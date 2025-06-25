@@ -3,7 +3,7 @@
 /node_modules
 /src/test*
 !/src/test
-xjs-common-*.tgz
+xjs-node-*.tgz
 
 # Compiled output
 /dist
