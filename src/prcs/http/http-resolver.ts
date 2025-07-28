@@ -12,7 +12,7 @@ export interface ProxyConfig {
     auth?: { name: string, pass: string };
 }
 const s_cmvRange = 5;
-const s_defaultCmv = 137;
+const s_defaultCmv = 138;
 export class HttpResolver implements IHttpClient {
     /** 
      * @param _baseCmv chrome major version refered when construct a user agent, and the version will be randomized between `n` to `n-4`.

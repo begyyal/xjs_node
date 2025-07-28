@@ -35,7 +35,7 @@ export interface HttpResponse {
 export interface IHttpClient {
     /**
      * request GET to the url with new context.
-     * @param url target url.
+     * @param url target url. (currently https only)
      * @param op.headers http headers.
      * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.
      * @param op.proxy proxy configuration.
@@ -48,7 +48,7 @@ export interface IHttpClient {
     get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse>;
     /**
      * request POST to the url with new context.
-     * @param url target url.
+     * @param url target url. (currently https only)
      * @param payload request payload. if this is an object, it is treated as json.
      * @param op.headers http headers.
      * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.

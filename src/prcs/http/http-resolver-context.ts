@@ -46,7 +46,7 @@ const s_mode2headers = new Map<ClientMode, (cmv: number) => (Record<string, stri
             "Accept-Language": "en-US,en;q=0.9",
             "Sec-Ch-Ua": uad,
             "Sec-Ch-Ua-Mobile": "?0",
-            "Sec-Ch-Ua-Platform": "Windows",
+            "Sec-Ch-Ua-Platform": '"Windows"',
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "none",
