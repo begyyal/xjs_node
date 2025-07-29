@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { URL } from "url";
 import { Agent, request as requestTls, RequestOptions } from "https";
-import { request, IncomingMessage, OutgoingHttpHeaders, IncomingHttpHeaders } from "http";
+import { request, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { AsyncLocalStorage } from "async_hooks";
 import { ClientMode, ProxyConfig } from "./http-resolver";
 import { ClientOption, HttpResponse, IHttpClient, RequestOption } from "./i-http-client";
@@ -77,36 +77,9 @@ export class HttpResolverContext implements IHttpClient {
             this._chHeaders = s_mode2headers.get(this._mode)(this.cmv);
         }
     }
-    get(url: string, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-    } & { outerRedirectCount?: number }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    get(url: string, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "string";
-    } & { outerRedirectCount?: number }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    get(url: string, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "buffer";
-    } & { outerRedirectCount?: number }): Promise<{ headers?: IncomingHttpHeaders, payload: Buffer }>;
-    /**
-     * request GET to the url.
-     * @param url target url.
-     * @param op.headers http headers.
-     * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
-     * @param op.downloadPath {@link RequestOption.downloadPath}
-     * @param op.timeout {@link RequestOption.timeout}
-     * @param op.responseType {@link RequestOption.responseType}
-     * @returns string encoded by utf-8 as response payload.
-     */
+    get(url: string, op?: RequestOption & { outerRedirectCount?: number, responseType: "string" }): Promise<HttpResponse<string>>;
+    get(url: string, op?: RequestOption & { outerRedirectCount?: number, responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    get(url: string, op?: RequestOption & { outerRedirectCount?: number }): Promise<HttpResponse<string>>;
     async get(url: string, op?: RequestOption & { outerRedirectCount?: number }): Promise<HttpResponse> {
         const u = new URL(url);
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
@@ -114,37 +87,9 @@ export class HttpResolverContext implements IHttpClient {
         Object.assign(rc, op);
         return await this._als.run(rc, this.getIn, u).finally(() => proxyAgent?.destroy());
     }
-    post(url: string, payload: any, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-    }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    post(url: string, payload: any, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "string";
-    }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    post(url: string, payload: any, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "buffer";
-    }): Promise<{ headers?: IncomingHttpHeaders, payload: Buffer }>;
-    /**
-     * request POST to the url.
-     * @param url target url.
-     * @param payload request payload. if this is an object, it is treated as json.
-     * @param op.headers http headers.
-     * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
-     * @param op.downloadPath {@link RequestOption.downloadPath}
-     * @param op.timeout {@link RequestOption.timeout}
-     * @param op.responseType {@link RequestOption.responseType}
-     * @returns string encoded by utf-8 as response payload.
-     */
+    post(url: string, payload: any, op?: RequestOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    post(url: string, payload: any, op?: RequestOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    post(url: string, payload: any, op?: RequestOption): Promise<HttpResponse<string>>;
     async post(url: string, payload: any, op?: RequestOption): Promise<HttpResponse> {
         const u = new URL(url);
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);

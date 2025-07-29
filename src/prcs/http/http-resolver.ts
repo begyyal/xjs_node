@@ -1,7 +1,6 @@
 import { Loggable, XjsErr } from "xjs-common";
 import { HttpResolverContext } from "./http-resolver-context";
 import { ClientOption, HttpResponse, IHttpClient, RequestOption } from "./i-http-client";
-import { IncomingHttpHeaders, OutgoingHttpHeaders } from "http";
 
 export interface ClientMode {
     id: number;
@@ -31,26 +30,11 @@ export class HttpResolver implements IHttpClient {
     newContext(op?: ClientOption): HttpResolverContext {
         return new HttpResolverContext(this.fixCmv(), op, this._l);
     }
-    get(url: string, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-    } & ClientOption & { redirectAsNewRequest?: boolean }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    get(url: string, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "string";
-    } & ClientOption & { redirectAsNewRequest?: boolean }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    get(url: string, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "buffer";
-    } & ClientOption & { redirectAsNewRequest?: boolean }): Promise<{ headers?: IncomingHttpHeaders, payload: Buffer }>;
+    get(url: string, op?: RequestOption & ClientOption
+        & { redirectAsNewRequest?: boolean, responseType: "string" }): Promise<HttpResponse<string>>;
+    get(url: string, op?: RequestOption & ClientOption
+        & { redirectAsNewRequest?: boolean, responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse<string>>;
     async get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse> {
         let redirectCount = op?.redirectAsNewRequest && -1;
         const bindOp = () => {
@@ -65,26 +49,9 @@ export class HttpResolver implements IHttpClient {
             else return await this.newContext(op).get(e.message, bindOp());
         }
     }
-    post(url: string, payload: any, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-    } & ClientOption): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    post(url: string, payload: any, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "string";
-    } & ClientOption): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
-    post(url: string, payload: any, op?: {
-        headers?: OutgoingHttpHeaders;
-        ignoreQuery?: boolean;
-        downloadPath?: string;
-        timeout?: number;
-        responseType: "buffer";
-    } & ClientOption): Promise<{ headers?: IncomingHttpHeaders, payload: Buffer }>;
+    post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string>>;
     async post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse> {
         return await this.newContext(op).post(url, payload, op);
     }

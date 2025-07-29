@@ -3,7 +3,13 @@ import { ClientMode, ProxyConfig } from "./http-resolver";
 import { s_clientMode } from "./http-resolver-context";
 
 export interface ClientOption {
+    /**
+     * {@link s_clientMode} that is imitated. default is random between chrome or firefox.
+     */
     mode?: ClientMode;
+    /**
+     * proxy configuration.
+     */
     proxy?: ProxyConfig;
 }
 export interface RequestOption {
@@ -26,7 +32,7 @@ export interface RequestOption {
      */
     responseType?: "string" | "buffer";
 }
-export interface HttpResponse {
+export interface HttpResponse<T = string | Buffer> {
     /**
      * http headers in the response.
      */
@@ -34,7 +40,7 @@ export interface HttpResponse {
     /**
      * response payload which has a type depends on {@link RequestOption.responseType}.
      */
-    payload?: string | Buffer;
+    payload?: T;
 }
 export interface IHttpClient {
     /**
@@ -49,8 +55,12 @@ export interface IHttpClient {
      * @param op.responseType {@link RequestOption.responseType}
      * @param op.redirectAsNewRequest handle redirect as new request. this may be efficient when using proxy which is implemented reverse proxy.
      * @returns http response. {@link HttpResponse}
-     */
-    get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse>;
+    */
+    get(url: string, op?: RequestOption & ClientOption
+        & { redirectAsNewRequest?: boolean, responseType: "string" }): Promise<HttpResponse<string>>;
+    get(url: string, op?: RequestOption & ClientOption
+        & { redirectAsNewRequest?: boolean, responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse<string>>;
     /**
      * request POST to the url with new context.
      * @param url target url. (currently https only)
@@ -64,5 +74,7 @@ export interface IHttpClient {
      * @param op.responseType {@link RequestOption.responseType}
      * @returns http response. {@link HttpResponse}
      */
-    post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse>;
+    post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string>>;
 }
