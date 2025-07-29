@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { URL } from "url";
 import { Agent, request as requestTls, RequestOptions } from "https";
-import { request, IncomingMessage, OutgoingHttpHeaders } from "http";
+import { request, IncomingMessage, OutgoingHttpHeaders, IncomingHttpHeaders } from "http";
 import { AsyncLocalStorage } from "async_hooks";
 import { ClientMode, ProxyConfig } from "./http-resolver";
 import { ClientOption, HttpResponse, IHttpClient, RequestOption } from "./i-http-client";
@@ -77,6 +77,26 @@ export class HttpResolverContext implements IHttpClient {
             this._chHeaders = s_mode2headers.get(this._mode)(this.cmv);
         }
     }
+    get(url: string, op?: {
+        headers?: OutgoingHttpHeaders;
+        ignoreQuery?: boolean;
+        downloadPath?: string;
+        timeout?: number;
+    } & { outerRedirectCount?: number }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
+    get(url: string, op?: {
+        headers?: OutgoingHttpHeaders;
+        ignoreQuery?: boolean;
+        downloadPath?: string;
+        timeout?: number;
+        responseType: "string";
+    } & { outerRedirectCount?: number }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
+    get(url: string, op?: {
+        headers?: OutgoingHttpHeaders;
+        ignoreQuery?: boolean;
+        downloadPath?: string;
+        timeout?: number;
+        responseType: "buffer";
+    } & { outerRedirectCount?: number }): Promise<{ headers?: IncomingHttpHeaders, payload: Buffer }>;
     /**
      * request GET to the url.
      * @param url target url.
@@ -84,6 +104,7 @@ export class HttpResolverContext implements IHttpClient {
      * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
      * @param op.downloadPath {@link RequestOption.downloadPath}
      * @param op.timeout {@link RequestOption.timeout}
+     * @param op.responseType {@link RequestOption.responseType}
      * @returns string encoded by utf-8 as response payload.
      */
     async get(url: string, op?: RequestOption & { outerRedirectCount?: number }): Promise<HttpResponse> {
@@ -93,6 +114,26 @@ export class HttpResolverContext implements IHttpClient {
         Object.assign(rc, op);
         return await this._als.run(rc, this.getIn, u).finally(() => proxyAgent?.destroy());
     }
+    post(url: string, payload: any, op?: {
+        headers?: OutgoingHttpHeaders;
+        ignoreQuery?: boolean;
+        downloadPath?: string;
+        timeout?: number;
+    }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
+    post(url: string, payload: any, op?: {
+        headers?: OutgoingHttpHeaders;
+        ignoreQuery?: boolean;
+        downloadPath?: string;
+        timeout?: number;
+        responseType: "string";
+    }): Promise<{ headers?: IncomingHttpHeaders, payload: string }>;
+    post(url: string, payload: any, op?: {
+        headers?: OutgoingHttpHeaders;
+        ignoreQuery?: boolean;
+        downloadPath?: string;
+        timeout?: number;
+        responseType: "buffer";
+    }): Promise<{ headers?: IncomingHttpHeaders, payload: Buffer }>;
     /**
      * request POST to the url.
      * @param url target url.
@@ -101,6 +142,7 @@ export class HttpResolverContext implements IHttpClient {
      * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
      * @param op.downloadPath {@link RequestOption.downloadPath}
      * @param op.timeout {@link RequestOption.timeout}
+     * @param op.responseType {@link RequestOption.responseType}
      * @returns string encoded by utf-8 as response payload.
      */
     async post(url: string, payload: any, op?: RequestOption): Promise<HttpResponse> {
@@ -216,9 +258,9 @@ export class HttpResolverContext implements IHttpClient {
                     retBuf = zlib.gunzipSync(retBuf);
                 else if (contentEncofing == "br")
                     retBuf = zlib.brotliDecompressSync(retBuf);
-                const data = retBuf.toString("utf8");
+                const data = rc.responseType === "buffer" ? retBuf : retBuf.toString("utf8");
                 if (sc !== 2) {
-                    if (data.trim()) this.warn(data);
+                    if (UType.isString(data) && data.trim()) this.warn(data);
                     reject(new XjsErr(s_errCode, `Https received a error status ${res.statusCode}`));
                 } else resolve({ payload: data, headers: res.headers });
             } catch (e) { reject(e); }
