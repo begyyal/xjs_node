@@ -11,6 +11,7 @@ import { ClientOption, HttpResponse, IHttpClient, RequestOption } from "./i-http
 import { UFile } from "../../func/u-file";
 import { joinPath } from "../../func/u";
 import { HttpMethod, Loggable, UArray, UHttp, UString, UType, XjsErr } from "xjs-common";
+import { Stream } from "stream";
 
 interface RequestContext extends RequestOption {
     redirectCount: number;
@@ -26,35 +27,35 @@ const s_errCode = 1200;
 const s_redirectLimit = 5;
 const s_mode2headers = new Map<ClientMode, (cmv: number) => (Record<string, string>)>([
     [s_clientMode.firefox, (cmv: number) => ({
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1",
-        "User-Agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${cmv}.0) Gecko/20100101 Firefox/${cmv}.0`
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en-US,en;q=0.5",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "user-agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${cmv}.0) Gecko/20100101 Firefox/${cmv}.0`
     })],
     [s_clientMode.chrome, (cmv: number) => {
         const uad = cmv < 130
             ? `"Not/A)Brand";v="8", "Chromium";v="${cmv}", "Google Chrome";v="${cmv}"`
             : `"Chromium";v="${cmv}", "Not:A-Brand";v="24", "Google Chrome";v="${cmv}"`;
         const ch = {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Accept-Encoding": "gzip, deflate, br, zstd",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Sec-Ch-Ua": uad,
-            "Sec-Ch-Ua-Mobile": "?0",
-            "Sec-Ch-Ua-Platform": '"Windows"',
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${cmv}.0.0.0 Safari/537.36`
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9",
+            "sec-ch-ua": uad,
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"Windows"',
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "user-agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${cmv}.0.0.0 Safari/537.36`
         };
-        if (cmv >= 124) ch["Priority"] = "u=0, i";
+        if (cmv >= 124) ch["priority"] = "u=0, i";
         return ch;
     }]]);
 
@@ -101,7 +102,7 @@ export class HttpResolverContext implements IHttpClient {
         const conf = this._proxyConfig;
         return new Promise((resolve, reject) => {
             const headers = {}
-            if (conf.auth) headers['Proxy-Authorization'] = `Basic ${Buffer.from(conf.auth.name + ':' + conf.auth.pass).toString('base64')}`;
+            if (conf.auth) headers['proxy-authorization'] = `Basic ${Buffer.from(conf.auth.name + ':' + conf.auth.pass).toString('base64')}`;
             const req = request({
                 host: conf.server,
                 port: conf.port,
@@ -124,22 +125,24 @@ export class HttpResolverContext implements IHttpClient {
         const params: RequestOptions = {};
         const rc = this._als.getStore();
         params.method = HttpMethod.Get;
-        params.headers = rc.headers ?? {};
+        params.headers = UHttp.normalizeHeaders(rc.headers);
         return await this.reqHttps(u, params);
     };
     private postIn = async (u: URL, payload: any): Promise<HttpResponse> => {
         const params: RequestOptions = {};
         const rc = this._als.getStore();
         params.method = HttpMethod.Post;
-        params.headers = rc.headers ?? {};
+        params.headers = UHttp.normalizeHeaders(rc.headers);
         let p = payload;
-        if (UType.isObject(payload)) {
+        if (p instanceof Stream) {
+            params.headers["content-type"] ??= "application/octet-stream";
+        } else if (UType.isObject(payload)) {
             p = JSON.stringify(payload);
-            params.headers["Content-Length"] = (p as string).length;
-            params.headers["Content-Type"] = "application/json";
+            params.headers["content-length"] = (p as string).length;
+            params.headers["content-type"] = "application/json";
         }
         return await this.reqHttps(u, params, p);
-    };
+    }
     private reqHttps(u: URL, params: RequestOptions, payload?: any): Promise<HttpResponse> {
         const rc = this._als.getStore();
         params.timeout = rc.timeout ?? 0;
@@ -160,8 +163,11 @@ export class HttpResolverContext implements IHttpClient {
                 req.destroy();
                 reject(new XjsErr(s_errCode, "The http request timeout, maybe server did not respond."));
             });
-            if (payload) req.write(payload);
-            req.end();
+            if (payload instanceof Stream) payload.pipe(req, { end: true });
+            else {
+                if (payload) req.write(payload);
+                req.end();
+            }
         });
     }
     private processResponse(

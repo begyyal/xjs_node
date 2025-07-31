@@ -58,7 +58,7 @@ import { HttpResolver, s_clientMode } from "xjs-node";
     const context = http.newContext();
     res = await context.get("https://begyyal.net/1");
     // this request sends with cookies that is set by precedent requests. 
-    // in POST, payload is treated as json if it is an object.
+    // in POST, payload is treated as json if it is an object. (but also Stream is acceptable.)
     res = await context.post("https://begyyal.net/2", { a: "b" });
 })();
 ```
