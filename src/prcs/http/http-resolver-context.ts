@@ -154,7 +154,7 @@ export class HttpResolverContext implements IHttpClient {
             params.ciphers = this._ciphers;
             params.headers = params.headers ? Object.assign(params.headers, this._chHeaders) : this._chHeaders
         }
-        if (this._cookies) this.setCookies(params.headers);
+        if (this._cookies) this.setCookies(params.headers as OutgoingHttpHeaders);
         return new Promise<HttpResponse>((resolve, reject) => {
             const req = requestTls(params,
                 (res: IncomingMessage) => this.processResponse(resolve, reject, rc, params.host, res));

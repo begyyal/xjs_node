@@ -1,0 +1,39 @@
+name: publish
+on: 
+  workflow_dispatch:
+    inputs:
+      version: 
+        description: 'package version.'
+        required: true
+        type: string
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup nodejs
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Build
+      run: npm ci && npm run build
+    - name: Publish
+      run: npm publish --provenance --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - name: Post tweet
+      run: |
+        ./tool/tweet_template.sh \
+        ${{ inputs.version }} \
+        ${{ github.event.repository.html_url }} > ./data_temp
+        ./tool/tweet.sh \
+        ${{ secrets.TW_CONS_KEY }} \
+        ${{ secrets.TW_CONS_SECRET }} \
+        ${{ secrets.TW_OAUTH_TOKEN }} \
+        ${{ secrets.TW_OAUTH_SECRET }} \
+        ./data_temp
+

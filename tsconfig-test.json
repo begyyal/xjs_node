@@ -7,11 +7,9 @@
     "removeComments": false,
     "experimentalDecorators": true,
     "declaration": false,
-    "outDir": "compiled",
-    "moduleResolution": "nodenext",
-    "noEmitOnError": true
+    "outDir": "compiled"
   },
   "include": [
-    "src/index.ts"
+    "src/test/test.ts"
   ]
 }
