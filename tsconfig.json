@@ -6,12 +6,10 @@
     "esModuleInterop": true,
     "removeComments": false,
     "experimentalDecorators": true,
-    "declaration": false,
-    "outDir": "compiled",
-    "moduleResolution": "nodenext",
-    "noEmitOnError": true
+    "declaration": true,
+    "outDir": "build"
   },
   "include": [
-    "src/index.ts"
+    "src/**/*.ts"
   ]
 }

@@ -6,10 +6,11 @@
 !/src/test
 .ghtoken
 xjs-node-*.tgz
+xjs-common-*.tgz
 
 # Compiled output
 /dist
-/compiled
+/build
 /tmp
 /out-tsc
 /bazel-out
