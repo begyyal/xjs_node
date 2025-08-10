@@ -1,6 +1,6 @@
 {
   "name": "xjs-node",
-  "version": "2.0.1-alpha.3",
+  "version": "2.0.1",
   "description": "library modules for nodejs + typescript that bundled general-purpose implementations.",
   "repository": {
     "type": "git",
