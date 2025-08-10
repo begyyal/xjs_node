@@ -1,4 +1,4 @@
-[![npm][npm-badge]][npm-url] [![CI][ci-badge]][ci-url]
+[![npm][npm-badge]][npm-url] [![CI][ci-badge]][ci-url] [![publish][publish-badge]][publish-url]
 
 # Overview
 Library modules for nodejs + typescript that bundled general-purpose implementations.  
@@ -76,4 +76,7 @@ XJS throws error with `code` property which has one of the following numbers.
 [npm-url]: https://npmjs.org/package/xjs-node
 [npm-badge]: https://badgen.net/npm/v/xjs-node
 [ci-url]: https://github.com/begyyal/xjs_node/actions/workflows/test.yml
-[ci-badge]: https://github.com/begyyal/xjs_node/actions/workflows/test.yml/badge.svg
+[ci-badge]: https://github.com/begyyal/xjs_node/actions/workflows/test.yml/badge.svg 
+[publish-url]: https://github.com/begyyal/xjs_node/actions/workflows/publish.yml
+[publish-badge]: https://github.com/begyyal/xjs_node/actions/workflows/publish.yml/badge.svg
+
