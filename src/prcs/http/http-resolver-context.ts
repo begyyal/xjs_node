@@ -204,7 +204,7 @@ export class HttpResolverContext implements IHttpClient {
         res.on('data', chunk => bfs.push(chunk));
         res.on('end', () => {
             try {
-                let retBuf = Buffer.concat(bfs);
+                let retBuf: Buffer = Buffer.concat(bfs);
                 if (contentEncofing == "gzip")
                     retBuf = zlib.gunzipSync(retBuf);
                 else if (contentEncofing == "br")
