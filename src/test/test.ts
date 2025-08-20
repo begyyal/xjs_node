@@ -1,8 +1,12 @@
-import { T_U_File } from "./t-u-file";
+import { T_UFile } from "./t-u-file";
 
 (async () => {
-    T_U_File();
-})().catch(e => {
-    console.log(e);
+    console.time("total time");
+    for (const u of [
+        T_UFile
+    ]) await u.exe();
+    console.timeEnd("total time");
+})().catch((e: Error) => {
+    console.error(e);
     process.exit(1);
 });
