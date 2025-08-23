@@ -22,7 +22,7 @@ export class TestCase<C = any> {
         try { await this._case.bind(this)(this._cg()); }
         catch (e) { err = e; }
         if (err && !this.errorExpected) throw err;
-        else if (this.errorExpected)
+        else if (!err && this.errorExpected)
             throw Error(`[${this.moduleName}.${this.name}] "${this._title}" didn't throw error but expected to.`);
     }
 }
