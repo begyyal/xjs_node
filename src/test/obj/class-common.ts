@@ -5,31 +5,6 @@ export abstract class CLS_Base {
     x: number;
     constructor() { }
 }
-export class CLS_A extends CLS_Base {
-    @DType.required
-    @DType.number
-    id: number;
-    @DType.number
-    a: number;
-    @DType.string
-    b: string;
-    @DType.recursive
-    c: CLS_B;
-    p: any;
-    constructor(
-        id?: number,
-        a?: number,
-        b?: string,
-        c?: CLS_B,
-        p?: any) {
-        super();
-        this.id = id;
-        this.a = a;
-        this.b = b;
-        this.c = c;
-        this.p = p;
-    }
-}
 export class CLS_B extends CLS_Base {
     @DType.required
     @DType.number
@@ -52,5 +27,30 @@ export class CLS_B extends CLS_Base {
         this.d = d;
         this.e = e;
         this.q = q;
+    }
+}
+export class CLS_A extends CLS_Base {
+    @DType.required
+    @DType.number
+    id: number;
+    @DType.number
+    a: number;
+    @DType.string
+    b: string;
+    @DType.object(CLS_B)
+    c: CLS_B;
+    p: any;
+    constructor(
+        id?: number,
+        a?: number,
+        b?: string,
+        c?: CLS_B,
+        p?: any) {
+        super();
+        this.id = id;
+        this.a = a;
+        this.b = b;
+        this.c = c;
+        this.p = p;
     }
 }
