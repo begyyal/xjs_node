@@ -1,6 +1,6 @@
 {
   "name": "xjs-node",
-  "version": "2.1.0-alpha.1",
+  "version": "2.1.0",
   "description": "library modules for nodejs + typescript that bundled general-purpose implementations.",
   "repository": {
     "type": "git",
@@ -36,6 +36,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "xjs-common": "^13.0.0-alpha.4"
+    "xjs-common": "^13.0.0"
   }
 }
