@@ -26,24 +26,33 @@ mt.appendUnit("[directory manipulations 1]", function (this: TestUnit) {
     this.appendCase("rm", function (this: TestCase) {
         UFile.rm([__dirname, "tmp"]);
         this.check(!UFile.exists(s_workingDir));
+        UFile.rm([__dirname, "tmp"]); // check no error.
+    });
+    this.appendCase("rm - errorIfAbsent is true.", function (this: TestCase) {
+        this.expectError();
+        UFile.rm([__dirname, "tmp"], true);
     });
 });
 mt.appendUnit("[file manipulations 1]", function (this: TestUnit) {
     this.setInitializer(() => UFile.mkdir(s_workingDir));
     this.setFinalizer(() => UFile.rm(s_workingDir));
     this.appendCase("write", function (this: TestCase) {
-        UFile.write([s_workingDir, "a.txt"], "aaa");
-        this.check(UFile.exists([s_workingDir, "a.txt"]));
+        UFile.write([s_workingDir, "a.json"], "{\"aaa\":1}");
+        this.check(UFile.exists([s_workingDir, "a.json"]));
     });
     this.appendCase("read", function (this: TestCase) {
-        this.check(UFile.read([s_workingDir, "a.txt"], "utf-8") === "aaa");
+        this.check(UFile.read([s_workingDir, "a.json"], "utf-8") === "{\"aaa\":1}");
+    });
+    this.appendCase("readAsJson", function (this: TestCase) {
+        const ary: { aaa: number } = UFile.readAsJson([s_workingDir, "a.json"]);
+        this.check(ary?.aaa === 1);
     });
     this.appendCase("cp", function (this: TestCase) {
-        UFile.cp([s_workingDir, "a.txt"], [s_workingDir, "b.txt"]);
+        UFile.cp([s_workingDir, "a.json"], [s_workingDir, "b.txt"]);
         this.check(UFile.exists([s_workingDir, "b.txt"]));
     });
     this.appendCase("mv", function (this: TestCase) {
-        UFile.mv([s_workingDir, "a.txt"], [s_workingDir, "c.txt"]);
+        UFile.mv([s_workingDir, "a.json"], [s_workingDir, "c.txt"]);
         this.check(!UFile.exists([s_workingDir, "a.txt"]) && UFile.exists([s_workingDir, "c.txt"]));
     });
     this.appendCase("reserveFilePath - reserve fname without any change.", function (this: TestCase) {

@@ -27,11 +27,12 @@ export namespace UFile {
         fs.writeFileSync(joinPath(p), c);
     }
     /**
-     * remove a file. no error if the file to be removed doesn't exist.
+     * remove a file. default is no error if the file to be removed doesn't exist.
+     * @param p path of the file. if passed as an array those are joined.
+     * @param errorIfAbsent raise an error if the file to be removed doesn't exist.
      */
-    export function rm(p: MaybeArray<string>): void {
-        const pt = joinPath(p);
-        if (fs.existsSync(pt)) fs.rmSync(pt, { recursive: true });
+    export function rm(p: MaybeArray<string>, errorIfAbsent?: boolean): void {
+        fs.rmSync(joinPath(p), { recursive: true, force: !errorIfAbsent });
     }
     export function exists(p: MaybeArray<string>): boolean {
         return !!p && fs.existsSync(joinPath(p));
@@ -49,6 +50,15 @@ export namespace UFile {
         const f = joinPath(p);
         if (!fs.existsSync(f)) throw new XjsErr(s_errCode, `No file found => ${f}`);
         return fs.readFileSync(f, encoding);
+    }
+    /**
+     * read specified file path as a json object.
+     * @param p file path
+     * @param d default value if the file path doesn't exist. default of this is `{}`.
+     * @param encoding encoding used by file reading.
+     */
+    export function readAsJson<T>(p: MaybeArray<string>, d: any = {}, encoding: BufferEncoding = "utf-8"): T {
+        return UFile.exists(p) ? JSON.parse(UFile.read(p, encoding)) : d as T;
     }
     export function cp(from: MaybeArray<string>, to: MaybeArray<string>): void {
         const f = joinPath(from), t = joinPath(to);

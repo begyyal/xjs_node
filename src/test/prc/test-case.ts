@@ -23,6 +23,6 @@ export class TestCase<C = any> {
         catch (e) { err = e; }
         if (err && !this.errorExpected) throw err;
         else if (!err && this.errorExpected)
-            throw Error(`[${this.moduleName}.${this.name}] "${this._title}" didn't throw error but expected to.`);
+            throw Error(`[${this.moduleName}.${this.name}] "${this._title}" didn't throw an error but expected to.`);
     }
 }
