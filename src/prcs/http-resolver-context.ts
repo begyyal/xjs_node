@@ -7,9 +7,9 @@ import { Agent, request as requestTls, RequestOptions } from "https";
 import { request, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { AsyncLocalStorage } from "async_hooks";
 import { ClientMode, ProxyConfig } from "./http-resolver";
-import { ClientOption, HttpResponse, IHttpClient, RequestOption } from "./i-http-client";
-import { UFile } from "../../func/u-file";
-import { joinPath } from "../../func/u";
+import { ClientOption, HttpResponse, HttpClient, RequestOption } from "../obj/http-client";
+import { UFile } from "../func/u-file";
+import { joinPath } from "../func/u";
 import { HttpMethod, Loggable, UArray, UHttp, UString, UType, XjsErr } from "xjs-common";
 import { Stream } from "stream";
 
@@ -59,7 +59,7 @@ const s_mode2headers = new Map<ClientMode, (cmv: number) => (Record<string, stri
         return ch;
     }]]);
 
-export class HttpResolverContext implements IHttpClient {
+export class HttpResolverContext implements HttpClient {
     private readonly _als = new AsyncLocalStorage<RequestContext>();
     private readonly _mode: ClientMode;
     private readonly _ciphers: string;

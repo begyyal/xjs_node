@@ -55,7 +55,7 @@ export namespace UFile {
      * read specified file path as a json object.
      * @param p file path
      * @param d default value if the file path doesn't exist. default of this is `{}`.
-     * @param encoding encoding used by file reading.
+     * @param encoding encoding used by file reading. default is `utf-8`.
      */
     export function readAsJson<T>(p: MaybeArray<string>, d: any = {}, encoding: BufferEncoding = "utf-8"): T {
         return UFile.exists(p) ? JSON.parse(UFile.read(p, encoding)) : d as T;

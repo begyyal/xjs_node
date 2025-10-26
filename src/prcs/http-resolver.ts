@@ -1,6 +1,6 @@
 import { Loggable, XjsErr } from "xjs-common";
 import { HttpResolverContext } from "./http-resolver-context";
-import { ClientOption, HttpResponse, IHttpClient, RequestOption } from "./i-http-client";
+import { ClientOption, HttpResponse, HttpClient, RequestOption } from "../obj/http-client";
 
 export interface ClientMode {
     id: number;
@@ -13,7 +13,7 @@ export interface ProxyConfig {
 }
 const s_cmvRange = 5;
 const s_defaultCmv = 138;
-export class HttpResolver implements IHttpClient {
+export class HttpResolver implements HttpClient {
     /** 
      * @param _baseCmv chrome major version refered when construct a user agent, and the version will be randomized between `n` to `n-4`.
      * @param _l custom logger. default is `console`.

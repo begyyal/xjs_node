@@ -1,6 +1,6 @@
 import { IncomingHttpHeaders, OutgoingHttpHeaders } from "http";
-import { ClientMode, ProxyConfig } from "./http-resolver";
-import { s_clientMode } from "./http-resolver-context";
+import { ClientMode, ProxyConfig } from "../prcs/http-resolver";
+import { s_clientMode } from "../prcs/http-resolver-context";
 
 export interface ClientOption {
     /**
@@ -42,7 +42,7 @@ export interface HttpResponse<T = string | Buffer> {
      */
     payload?: T;
 }
-export interface IHttpClient {
+export interface HttpClient {
     /**
      * request GET to the url with new context.
      * @param url target url. (currently https only)
