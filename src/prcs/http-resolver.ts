@@ -35,7 +35,7 @@ export class HttpResolver implements HttpClient {
     get(url: string, op?: RequestOption & ClientOption
         & { redirectAsNewRequest?: boolean, responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
     get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse<string>>;
-    async get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse> {
+    async get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse<string | Buffer>> {
         let redirectCount = op?.redirectAsNewRequest && -1;
         const bindOp = () => {
             const option = Object.assign({}, op);
@@ -52,7 +52,7 @@ export class HttpResolver implements HttpClient {
     post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
     post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
     post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string>>;
-    async post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse> {
+    async post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string | Buffer>> {
         return await this.newContext(op).post(url, payload, op);
     }
     private fixCmv(): number {

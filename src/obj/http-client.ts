@@ -32,7 +32,7 @@ export interface RequestOption {
      */
     responseType?: "string" | "buffer";
 }
-export interface HttpResponse<T = string | Buffer> {
+export interface HttpResponse<T = string> {
     /**
      * http headers in the response.
      */

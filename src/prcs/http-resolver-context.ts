@@ -81,7 +81,7 @@ export class HttpResolverContext implements HttpClient {
     get(url: string, op?: RequestOption & { outerRedirectCount?: number, responseType: "string" }): Promise<HttpResponse<string>>;
     get(url: string, op?: RequestOption & { outerRedirectCount?: number, responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
     get(url: string, op?: RequestOption & { outerRedirectCount?: number }): Promise<HttpResponse<string>>;
-    async get(url: string, op?: RequestOption & { outerRedirectCount?: number }): Promise<HttpResponse> {
+    async get(url: string, op?: RequestOption & { outerRedirectCount?: number }): Promise<HttpResponse<string | Buffer>> {
         const u = new URL(url);
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
         const rc = { redirectCount: op?.outerRedirectCount ?? 0, proxyAgent };
@@ -91,7 +91,7 @@ export class HttpResolverContext implements HttpClient {
     post(url: string, payload: any, op?: RequestOption & { responseType: "string" }): Promise<HttpResponse<string>>;
     post(url: string, payload: any, op?: RequestOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
     post(url: string, payload: any, op?: RequestOption): Promise<HttpResponse<string>>;
-    async post(url: string, payload: any, op?: RequestOption): Promise<HttpResponse> {
+    async post(url: string, payload: any, op?: RequestOption): Promise<HttpResponse<string | Buffer>> {
         const u = new URL(url);
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
         const rc = { redirectCount: 0, proxyAgent };
