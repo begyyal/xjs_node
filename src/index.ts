@@ -4,4 +4,4 @@ export * from "./func/u-file"
 
 export { HttpResolver, ClientMode } from "./prcs/http-resolver";
 export { s_clientMode } from "./prcs/http-resolver-context";
-export { HttpClient, HttpResponse } from "./obj/http-client";
+export { HttpClient, HttpResponse, ClientOption, RequestOption } from "./obj/http-client";

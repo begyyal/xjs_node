@@ -1,4 +1,4 @@
-import { Loggable, XjsErr } from "xjs-common";
+import { XjsErr } from "xjs-common";
 import { HttpResolverContext } from "./http-resolver-context";
 import { ClientOption, HttpResponse, HttpClient, RequestOption } from "../obj/http-client";
 
@@ -11,24 +11,27 @@ export interface ProxyConfig {
     port: number;
     auth?: { name: string, pass: string };
 }
-const s_cmvRange = 5;
-const s_defaultCmv = 138;
+export const s_defaultClientOption: ClientOption = {
+    cmv: 141,
+    logger: console,
+    logLevel: "warn"
+};
 export class HttpResolver implements HttpClient {
+    public readonly mode?: ClientMode;
+    public readonly cmv: number;
     /** 
-     * @param _baseCmv chrome major version refered when construct a user agent, and the version will be randomized between `n` to `n-4`.
-     * @param _l custom logger. default is `console`.
+     * @param op {@link ClientOption}
      */
-    constructor(
-        private _baseCmv: number = s_defaultCmv,
-        private _l: Loggable = console) { }
+    constructor(private readonly _op: ClientOption = s_defaultClientOption) {
+        this.mode = this._op.mode;
+        this.cmv = this._op.cmv;
+    }
     /**
      * create a http client as new context that keeps some states. (browser type, cookies, ciphers order, etc...)
-     * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.
-     * @param op.proxy proxy configuration.
-     * @returns a http client as new context.
+     * @param op {@link ClientOption}
      */
-    newContext(op?: ClientOption): HttpResolverContext {
-        return new HttpResolverContext(this.fixCmv(), op, this._l);
+    newContext(op?: ClientOption): HttpClient {
+        return new HttpResolverContext(Object.assign({}, this._op, op));
     }
     get(url: string, op?: RequestOption & ClientOption
         & { redirectAsNewRequest?: boolean, responseType: "string" }): Promise<HttpResponse<string>>;
@@ -54,8 +57,5 @@ export class HttpResolver implements HttpClient {
     post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string>>;
     async post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string | Buffer>> {
         return await this.newContext(op).post(url, payload, op);
-    }
-    private fixCmv(): number {
-        return this._baseCmv - Math.floor(Math.random() * s_cmvRange);
     }
 }

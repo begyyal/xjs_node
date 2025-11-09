@@ -1,7 +1,9 @@
 import { IncomingHttpHeaders, OutgoingHttpHeaders } from "http";
 import { ClientMode, ProxyConfig } from "../prcs/http-resolver";
 import { s_clientMode } from "../prcs/http-resolver-context";
+import { Loggable } from "xjs-common";
 
+export type LogLevel = "log" | "warn" | "error";
 export interface ClientOption {
     /**
      * {@link s_clientMode} that is imitated. default is random between chrome or firefox.
@@ -11,6 +13,18 @@ export interface ClientOption {
      * proxy configuration.
      */
     proxy?: ProxyConfig;
+    /**
+     * chrome major version refered when construct an user agent.
+     */
+    cmv: number;
+    /**
+     * custom logger. default is `console`.
+     */
+    logger: Loggable;
+    /**
+     * verbosity of logging.
+     */
+    logLevel: LogLevel;
 }
 export interface RequestOption {
     headers?: OutgoingHttpHeaders;
@@ -43,6 +57,14 @@ export interface HttpResponse<T = string> {
     payload?: T;
 }
 export interface HttpClient {
+    /**
+     * {@link s_clientMode} that is imitated. default is random between chrome or firefox.
+     */
+    readonly mode?: ClientMode;
+    /**
+     * chrome major version refered when construct an user agent.
+     */
+    readonly cmv: number;
     /**
      * request GET to the url with new context.
      * @param url target url. (currently https only)

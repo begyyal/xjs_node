@@ -6,8 +6,8 @@ import { URL } from "url";
 import { Agent, request as requestTls, RequestOptions } from "https";
 import { request, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { AsyncLocalStorage } from "async_hooks";
-import { ClientMode, ProxyConfig } from "./http-resolver";
-import { ClientOption, HttpResponse, HttpClient, RequestOption } from "../obj/http-client";
+import { ClientMode, ProxyConfig, s_defaultClientOption } from "./http-resolver";
+import { ClientOption, HttpResponse, HttpClient, RequestOption, LogLevel } from "../obj/http-client";
 import { UFile } from "../func/u-file";
 import { joinPath } from "../func/u";
 import { HttpMethod, Loggable, UArray, UHttp, UString, UType, XjsErr } from "xjs-common";
@@ -58,24 +58,27 @@ const s_mode2headers = new Map<ClientMode, (cmv: number) => (Record<string, stri
         if (cmv >= 124) ch["priority"] = "u=0, i";
         return ch;
     }]]);
+const s_logLevelMap = new Map<LogLevel, number>([["log", 30], ["warn", 20], ["error", 10]]);
 
 export class HttpResolverContext implements HttpClient {
+    public readonly mode: ClientMode;
+    public readonly cmv: number;
     private readonly _als = new AsyncLocalStorage<RequestContext>();
-    private readonly _mode: ClientMode;
+    private readonly _l: Loggable;
+    private readonly _logLevel: number;
     private readonly _ciphers: string;
     private readonly _proxyConfig?: ProxyConfig;
     private readonly _chHeaders: Record<string, string>;
     private _cookies?: Record<string, string>;
-    get clientMode() { return Object.keys(s_clientMode).find((_, i) => i === this._mode.id); }
-    constructor(
-        public readonly cmv: number,
-        op?: ClientOption,
-        private _l: Loggable = console) {
-        this._mode = op?.mode ?? UArray.randomPick([s_clientMode.chrome, s_clientMode.firefox]);
-        this._proxyConfig = op?.proxy;
-        if (this._mode.id > 0) {
-            this._ciphers = this.createCiphers(this._mode);
-            this._chHeaders = s_mode2headers.get(this._mode)(this.cmv);
+    constructor(op: ClientOption = s_defaultClientOption) {
+        this.mode = op.mode ?? UArray.randomPick([s_clientMode.chrome, s_clientMode.firefox]);
+        this.cmv = op.cmv;
+        this._proxyConfig = op.proxy;
+        this._l = op.logger;
+        this._logLevel = s_logLevelMap.get(op.logLevel);
+        if (this.mode.id > 0) {
+            this._ciphers = this.createCiphers(this.mode);
+            this._chHeaders = s_mode2headers.get(this.mode)(this.cmv);
         }
     }
     get(url: string, op?: RequestOption & { outerRedirectCount?: number, responseType: "string" }): Promise<HttpResponse<string>>;
@@ -150,7 +153,7 @@ export class HttpResolverContext implements HttpClient {
         params.host = u.host;
         params.path = (rc.ignoreQuery || !u.search) ? u.pathname : `${u.pathname}${u.search}`;
         params.agent = rc.proxyAgent;
-        if (this._mode.id > 0) {
+        if (this.mode.id > 0) {
             params.ciphers = this._ciphers;
             params.headers = params.headers ? Object.assign(params.headers, this._chHeaders) : this._chHeaders
         }
@@ -284,12 +287,12 @@ export class HttpResolverContext implements HttpClient {
         this.log(JSON.stringify(this._cookies));
     }
     private log(msg: string): void {
-        this._l.log(`[http-resolver] ${msg}`);
+        if (s_logLevelMap.get("log") <= this._logLevel) this._l.log(`[http-resolver] ${msg}`);
     }
     private warn(msg: string): void {
-        this._l.warn(`[http-resolver] ${msg}`);
+        if (s_logLevelMap.get("warn") <= this._logLevel) this._l.warn(`[http-resolver] ${msg}`);
     }
     private error(msg: string): void {
-        this._l.error(`[http-resolver] ${msg}`);
+        if (s_logLevelMap.get("error") <= this._logLevel) this._l.error(`[http-resolver] ${msg}`);
     }
 }
