@@ -16,15 +16,15 @@ export interface ClientOption {
     /**
      * chrome major version refered when construct an user agent.
      */
-    cmv: number;
+    cmv?: number;
     /**
      * custom logger. default is `console`.
      */
-    logger: Loggable;
+    logger?: Loggable;
     /**
      * verbosity of logging.
      */
-    logLevel: LogLevel;
+    logLevel?: LogLevel;
 }
 export interface RequestOption {
     headers?: OutgoingHttpHeaders;
