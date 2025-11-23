@@ -78,19 +78,21 @@ export namespace UFile {
     }
     /**
      * check availability to export a file with specified directory and file name. 
-     * if it doesn't, retry to check after appending incremental number (e.g. `.1`) to the filename.
+     * if it doesn't, this retries to check after appending incremental number to the filename excluding an extension (e.g. `aaa_1.txt`).
      * @param dir destination directory path.
      * @param fname file name wanna export to.
-     * @returns exportable file path.
      */
     export function reserveFilePath(dir: MaybeArray<string>, fname: string): string {
-        const pt = joinPath(dir)
+        const pt = joinPath(dir);
         if (!pt || !fs.statSync(pt).isDirectory())
             throw new XjsErr(s_errCode, "Specified directory path is not directory.");
         if (!fname || fname.match(/[\\/:*?"<>|]/))
             throw new XjsErr(s_errCode, "Specified filename is invalid due to empty or including disallowed characters.");
         let dest = joinPath(pt, fname), i = 1;
-        while (fs.existsSync(dest)) dest = joinPath(pt, `${fname}.${i++}`);
+        while (fs.existsSync(dest)) {
+            const ext = fname.match(/^(.+)(\.[^\.]+)$/);
+            dest = joinPath(pt, `${ext ? ext[1] : fname}_${i++}${ext ? ext[2] : ""}`);
+        }
         return dest;
     }
     /**
