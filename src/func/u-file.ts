@@ -5,15 +5,6 @@ import { joinPath } from "./u";
 
 const s_errCode = 1040;
 
-interface FileStatus {
-    isFile(): boolean;
-    isDirectory(): boolean;
-    isBlockDevice(): boolean;
-    isCharacterDevice(): boolean;
-    isSymbolicLink(): boolean;
-    isFIFO(): boolean;
-    isSocket(): boolean;
-}
 export namespace UFile {
     export function mkdir(p: MaybeArray<string>): boolean {
         const dirPath = joinPath(p);
@@ -40,7 +31,7 @@ export namespace UFile {
     /**
      * return a file status. if the file of the status doesn't exist, this returns `null`.
      */
-    export function status(p: MaybeArray<string>): FileStatus {
+    export function status(p: MaybeArray<string>): fs.Stats {
         const pt = joinPath(p);
         return fs.existsSync(pt) ? fs.statSync(pt) : null;
     }
