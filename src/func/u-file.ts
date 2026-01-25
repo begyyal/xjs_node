@@ -59,7 +59,7 @@ export namespace UFile {
      * @param d default value if the file path doesn't exist. default of this is `{}`.
      * @param encoding encoding used by file reading. default is `utf-8`.
      */
-    export async function readAsJson<T>(p: MaybeArray<string>, d: any = {}, encoding: BufferEncoding = "utf-8"): Promise<T> {
+    export async function readAsJson<T = any>(p: MaybeArray<string>, d: any = {}, encoding: BufferEncoding = "utf-8"): Promise<T> {
         return UFile.exists(p) ? JSON.parse(await UFile.read(p, encoding)) : d as T;
     }
     export function cp(from: MaybeArray<string>, to: MaybeArray<string>): Promise<void> {
