@@ -1,10 +1,11 @@
+import { MaybePromise } from "xjs-common";
 import { TestCase } from "./test-case";
 
 export class TestUnit<C = any> {
     private readonly _cases: TestCase[] = [];
     private contextGen: () => Partial<C> = () => ({});
-    private initalizer: () => any | Promise<any>;
-    private finalizer: () => any | Promise<any>;
+    private initalizer: () => MaybePromise;
+    private finalizer: () => MaybePromise;
     get caseCount() { return this._cases.length; }
     constructor(
         readonly moduleName: string,
@@ -25,23 +26,23 @@ export class TestUnit<C = any> {
     }
     appendCase(
         title: string,
-        cb: (this: TestCase<C>, c: C) => void | Promise<void>,
+        cb: (this: TestCase<C>, c: C) => MaybePromise<void>,
         op?: { concurrent?: boolean }): void {
         if (this._cases.some(u => u.name === title))
             throw Error("duplication of test case was detected.");
         this._cases.push(new TestCase(this.moduleName, this.name, title, cb, this.contextGen, op));
     }
-    setInitializer(initalizer: () => any | Promise<any>): void {
+    setInitializer(initalizer: () => MaybePromise): void {
         this.initalizer = initalizer;
     }
-    setFinalizer(finalizer: () => any | Promise<any>): void {
+    setFinalizer(finalizer: () => MaybePromise): void {
         this.finalizer = finalizer;
     }
     async exe(): Promise<void> {
         try {
-            this.initalizer?.();
+            await this.initalizer?.();
             for (const tc of this._cases.filter(c => !c.op?.concurrent)) await tc.exe();
             await Promise.all(this._cases.filter(c => !!c.op?.concurrent).map(tc => tc.exe()));
-        } finally { this.finalizer?.(); }
+        } finally { await this.finalizer?.(); }
     }
 }

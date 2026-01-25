@@ -3,6 +3,7 @@
 /node_modules
 /test**
 /src/test*
+/src/test/tmp
 !/src/test
 .ghtoken
 xjs-node-*.tgz

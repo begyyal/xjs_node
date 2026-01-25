@@ -23,36 +23,36 @@ mt.appendUnit("[directory manipulations 1]", function (this: TestUnit) {
     this.appendCase("exists", function (this: TestCase) {
         this.check(UFile.exists([__dirname, "tmp"]));
     });
-    this.appendCase("rm", function (this: TestCase) {
-        UFile.rm([__dirname, "tmp"]);
+    this.appendCase("rm", async function (this: TestCase) {
+        await UFile.rm([__dirname, "tmp"]);
         this.check(!UFile.exists(s_workingDir));
-        UFile.rm([__dirname, "tmp"]); // check no error.
+        await UFile.rm([__dirname, "tmp"]); // check no error.
     });
-    this.appendCase("rm - errorIfAbsent is true.", function (this: TestCase) {
+    this.appendCase("rm - errorIfAbsent is true.", async function (this: TestCase) {
         this.expectError();
-        UFile.rm([__dirname, "tmp"], true);
+        await UFile.rm([__dirname, "tmp"], true);
     });
 });
 mt.appendUnit("[file manipulations 1]", function (this: TestUnit) {
     this.setInitializer(() => UFile.mkdir(s_workingDir));
     this.setFinalizer(() => UFile.rm(s_workingDir));
-    this.appendCase("write", function (this: TestCase) {
-        UFile.write([s_workingDir, "a.json"], "{\"aaa\":1}");
+    this.appendCase("write", async function (this: TestCase) {
+        await UFile.write([s_workingDir, "a.json"], "{\"aaa\":1}");
         this.check(UFile.exists([s_workingDir, "a.json"]));
     });
-    this.appendCase("read", function (this: TestCase) {
-        this.check(UFile.read([s_workingDir, "a.json"], "utf-8") === "{\"aaa\":1}");
+    this.appendCase("read", async function (this: TestCase) {
+        this.check(await UFile.read([s_workingDir, "a.json"], "utf-8") === "{\"aaa\":1}");
     });
-    this.appendCase("readAsJson", function (this: TestCase) {
-        const ary: { aaa: number } = UFile.readAsJson([s_workingDir, "a.json"]);
+    this.appendCase("readAsJson", async function (this: TestCase) {
+        const ary: { aaa: number } = await UFile.readAsJson([s_workingDir, "a.json"]);
         this.check(ary?.aaa === 1);
     });
-    this.appendCase("cp", function (this: TestCase) {
-        UFile.cp([s_workingDir, "a.json"], [s_workingDir, "b.txt"]);
+    this.appendCase("cp", async function (this: TestCase) {
+        await UFile.cp([s_workingDir, "a.json"], [s_workingDir, "b.txt"]);
         this.check(UFile.exists([s_workingDir, "b.txt"]));
     });
-    this.appendCase("mv", function (this: TestCase) {
-        UFile.mv([s_workingDir, "a.json"], [s_workingDir, "c.txt"]);
+    this.appendCase("mv", async function (this: TestCase) {
+        await UFile.mv([s_workingDir, "a.json"], [s_workingDir, "c.txt"]);
         this.check(!UFile.exists([s_workingDir, "a.txt"]) && UFile.exists([s_workingDir, "c.txt"]));
     });
 });
@@ -63,23 +63,23 @@ mt.appendUnit("reserveFilePath", function (this: TestUnit) {
         const fname = UFile.reserveFilePath(s_workingDir, "aa.txt");
         this.check(fname === joinPath(s_workingDir, "aa.txt"));
     });
-    this.appendCase("reserve fname with a suffix.", function (this: TestCase) {
-        UFile.write([s_workingDir, "aa.txt"], "");
+    this.appendCase("reserve fname with a suffix.", async function (this: TestCase) {
+        await UFile.write([s_workingDir, "aa.txt"], "");
         const fname = UFile.reserveFilePath(s_workingDir, "aa.txt");
         this.check(fname === joinPath(s_workingDir, "aa_1.txt"), () => fname);
     });
-    this.appendCase("reserve fname which doesn't have an extension.", function (this: TestCase) {
-        UFile.write([s_workingDir, "bb"], "");
+    this.appendCase("reserve fname which doesn't have an extension.", async function (this: TestCase) {
+        await UFile.write([s_workingDir, "bb"], "");
         const fname = UFile.reserveFilePath(s_workingDir, "bb");
         this.check(fname === joinPath(s_workingDir, "bb_1"), () => fname);
     });
-    this.appendCase("reserve fname which starts with dot.", function (this: TestCase) {
-        UFile.write([s_workingDir, ".cc"], "");
+    this.appendCase("reserve fname which starts with dot.", async function (this: TestCase) {
+        await UFile.write([s_workingDir, ".cc"], "");
         const fname = UFile.reserveFilePath(s_workingDir, ".cc");
         this.check(fname === joinPath(s_workingDir, ".cc_1"), () => fname);
     });
-    this.appendCase("reserve fname which starts with dot and has an extension.", function (this: TestCase) {
-        UFile.write([s_workingDir, ".dd.txt"], "");
+    this.appendCase("reserve fname which starts with dot and has an extension.", async function (this: TestCase) {
+        await UFile.write([s_workingDir, ".dd.txt"], "");
         const fname = UFile.reserveFilePath(s_workingDir, ".dd.txt");
         this.check(fname === joinPath(s_workingDir, ".dd_1.txt"), () => fname);
     });
