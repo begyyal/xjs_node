@@ -6,6 +6,10 @@ import { joinPath } from "./u";
 const s_errCode = 1040;
 
 export namespace UFile {
+    /** 
+     * make directory. this raise no error if the directory to be made exists.
+     * this returns boolean whether mkdir was executed or not.
+     */
     export function mkdir(p: MaybeArray<string>): boolean {
         const dirPath = joinPath(p);
         const e = fs.existsSync(dirPath);
