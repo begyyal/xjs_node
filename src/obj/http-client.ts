@@ -111,7 +111,7 @@ export interface HttpClient {
      * @param op.responseType {@link RequestOption.responseType}
      * @returns http response. {@link HttpResponse}
      */
-    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
-    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
-    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption): Promise<HttpResponse<string>>;
+    put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string>>;
 }

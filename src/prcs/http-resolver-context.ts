@@ -101,10 +101,10 @@ export class HttpResolverContext implements HttpClient {
         Object.assign(rc, op);
         return await this._als.run(rc, this.postputIn, u, HttpMethod.Post, payload).finally(() => proxyAgent?.destroy());
     }
-    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & { responseType: "string" }): Promise<HttpResponse<string>>;
-    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
-    put(url: string, payload: any, op?: RequestOption & { downloadPath: never }): Promise<HttpResponse<string>>;
-    async put(url: string, payload: any, op?: RequestOption): Promise<HttpResponse<string | Buffer>> {
+    put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & { responseType: "string" }): Promise<HttpResponse<string>>;
+    put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath">): Promise<HttpResponse<string>>;
+    async put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath">): Promise<HttpResponse<string | Buffer>> {
         const u = new URL(url);
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
         const rc = { redirectCount: 0, proxyAgent };
