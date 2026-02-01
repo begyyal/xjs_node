@@ -99,4 +99,19 @@ export interface HttpClient {
     post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
     post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
     post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string>>;
+    /**
+     * request PUT to the url with new context.
+     * @param url target url. (currently https only)
+     * @param payload request payload. if this is a Stream, pipe will be used, otherwise if an object, this is treated as json.
+     * @param op.headers http headers.
+     * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.
+     * @param op.proxy proxy configuration.
+     * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
+     * @param op.timeout {@link RequestOption.timeout}
+     * @param op.responseType {@link RequestOption.responseType}
+     * @returns http response. {@link HttpResponse}
+     */
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption): Promise<HttpResponse<string>>;
 }

@@ -99,7 +99,17 @@ export class HttpResolverContext implements HttpClient {
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
         const rc = { redirectCount: 0, proxyAgent };
         Object.assign(rc, op);
-        return await this._als.run(rc, this.postIn, u, payload).finally(() => proxyAgent?.destroy());
+        return await this._als.run(rc, this.postputIn, u, HttpMethod.Post, payload).finally(() => proxyAgent?.destroy());
+    }
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & { responseType: "string" }): Promise<HttpResponse<string>>;
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never }): Promise<HttpResponse<string>>;
+    async put(url: string, payload: any, op?: RequestOption): Promise<HttpResponse<string | Buffer>> {
+        const u = new URL(url);
+        const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
+        const rc = { redirectCount: 0, proxyAgent };
+        Object.assign(rc, op);
+        return await this._als.run(rc, this.postputIn, u, HttpMethod.Put, payload).finally(() => proxyAgent?.destroy());
     }
     private createProxyAgent(u: URL): Promise<Agent> {
         const conf = this._proxyConfig;
@@ -131,10 +141,10 @@ export class HttpResolverContext implements HttpClient {
         params.headers = UHttp.normalizeHeaders(rc.headers);
         return await this.reqHttps(u, params);
     };
-    private postIn = async (u: URL, payload: any): Promise<HttpResponse> => {
+    private postputIn = async (u: URL, method: HttpMethod.Post | HttpMethod.Put, payload: any): Promise<HttpResponse> => {
         const params: RequestOptions = {};
         const rc = this._als.getStore();
-        params.method = HttpMethod.Post;
+        params.method = method;
         params.headers = UHttp.normalizeHeaders(rc.headers);
         let p = payload;
         if (p instanceof Stream) {

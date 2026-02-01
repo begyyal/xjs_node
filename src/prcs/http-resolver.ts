@@ -58,4 +58,10 @@ export class HttpResolver implements HttpClient {
     async post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string | Buffer>> {
         return await this.newContext(op).post(url, payload, op);
     }
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption): Promise<HttpResponse<string>>;
+    async put(url: string, payload: any, op?: RequestOption & { downloadPath: never } & ClientOption): Promise<HttpResponse<string | Buffer>> {
+        return await this.newContext(op).put(url, payload, op);
+    }
 }
