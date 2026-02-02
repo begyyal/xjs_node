@@ -225,7 +225,7 @@ export class HttpResolverContext implements HttpClient {
                 const data = rc.responseType === "buffer" ? retBuf : retBuf.toString("utf8");
                 if (sc !== 2) {
                     if (UType.isString(data) && data.trim()) this.warn(data);
-                    reject(new XjsErr(s_errCode, `Https received a error status ${res.statusCode}`));
+                    reject(new XjsErr(s_errCode, `Https received an error status ${res.statusCode}`));
                 } else resolve({ payload: data, headers: res.headers });
             } catch (e) { this.handleError(reject, e, "something went wrong in processing response."); }
         });
