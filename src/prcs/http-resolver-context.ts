@@ -6,7 +6,7 @@ import { URL } from "url";
 import { Agent, request as requestTls, RequestOptions } from "https";
 import { request, IncomingMessage, OutgoingHttpHeaders } from "http";
 import { AsyncLocalStorage } from "async_hooks";
-import { ClientMode, ProxyConfig, s_defaultClientOption } from "./http-resolver";
+import { ClientMode, ProxyConfig } from "./http-resolver";
 import { ClientOption, HttpResponse, HttpClient, RequestOption, LogLevel } from "../obj/http-client";
 import { UFile } from "../func/u-file";
 import { joinPath } from "../func/u";
@@ -70,7 +70,7 @@ export class HttpResolverContext implements HttpClient {
     private readonly _proxyConfig?: ProxyConfig;
     private readonly _chHeaders: Record<string, string>;
     private _cookies?: Record<string, string>;
-    constructor(op: ClientOption = s_defaultClientOption) {
+    constructor(op: ClientOption) {
         this.mode = op.mode ?? UArray.randomPick([s_clientMode.chrome, s_clientMode.firefox]);
         this.cmv = op.cmv;
         this._proxyConfig = op.proxy;
@@ -126,7 +126,7 @@ export class HttpResolverContext implements HttpClient {
                 if (res.statusCode === 200) resolve(new Agent({ socket, keepAlive: true }));
                 else reject(new XjsErr(s_errCode, "Could not connect to proxy."));
             });
-            req.on('error', reject);
+            req.on('error', e => this.handleError(reject, e, "an error occurred on the CONNECT request."));
             req.on('timeout', () => {
                 req.destroy();
                 reject(new XjsErr(s_errCode, "The http request timeout, maybe server did not respond."));
@@ -171,16 +171,16 @@ export class HttpResolverContext implements HttpClient {
         return new Promise<HttpResponse>((resolve, reject) => {
             const req = requestTls(params,
                 (res: IncomingMessage) => this.processResponse(resolve, reject, rc, params.host, res));
-            req.on('error', reject);
+            req.on('error', e => this.handleError(reject, e, "an error occurred on the request."));
             req.on('timeout', () => {
                 req.destroy();
                 reject(new XjsErr(s_errCode, "The http request timeout, maybe server did not respond."));
             });
             if (payload instanceof Stream) payload.pipe(req, { end: true });
-            else {
-                if (payload) req.write(payload);
-                req.end();
-            }
+            else if (!payload) req.end();
+            else req.write(payload, e => e
+                ? this.handleError(reject, e, "something went wrong in writing payload to the request.")
+                : req.end());
         });
     }
     private processResponse(
@@ -202,7 +202,7 @@ export class HttpResolverContext implements HttpClient {
                 res.pipe(stream);
                 stream.on("finish", () => stream.close());
                 stream.on("close", () => resolve({ headers: res.headers }));
-                stream.on("error", reject);
+                stream.on("error", e => this.handleError(reject, e, "an error occurred on donwloading stream."));
                 return;
             } catch (e) {
                 if (e instanceof XjsErr) reject(e);
@@ -227,7 +227,7 @@ export class HttpResolverContext implements HttpClient {
                     if (UType.isString(data) && data.trim()) this.warn(data);
                     reject(new XjsErr(s_errCode, `Https received a error status ${res.statusCode}`));
                 } else resolve({ payload: data, headers: res.headers });
-            } catch (e) { reject(e); }
+            } catch (e) { this.handleError(reject, e, "something went wrong in processing response."); }
         });
     }
     private resolveDownloadPath(opPath: string, disposition: string): string {
@@ -304,5 +304,8 @@ export class HttpResolverContext implements HttpClient {
     }
     private error(msg: string): void {
         if (s_logLevelMap.get("error") <= this._logLevel) this._l.error(`[http-resolver] ${msg}`);
+    }
+    private handleError(rj: (r: any) => void, e: any, msg: string): void {
+        rj(new XjsErr(s_errCode, msg, e));
     }
 }

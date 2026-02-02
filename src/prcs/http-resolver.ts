@@ -11,18 +11,18 @@ export interface ProxyConfig {
     port: number;
     auth?: { name: string, pass: string };
 }
-export const s_defaultClientOption: ClientOption = {
-    cmv: 141,
-    logger: console,
-    logLevel: "warn"
-};
 export class HttpResolver implements HttpClient {
+    private readonly _defaultClientOption: ClientOption = {
+        cmv: 141,
+        logger: console,
+        logLevel: "warn"
+    };
     public readonly mode?: ClientMode;
     public readonly cmv: number;
     /** 
      * @param op {@link ClientOption}
      */
-    constructor(private readonly _op: ClientOption = s_defaultClientOption) {
+    constructor(private readonly _op: ClientOption = this._defaultClientOption) {
         this.mode = this._op.mode;
         this.cmv = this._op.cmv;
     }
@@ -31,7 +31,7 @@ export class HttpResolver implements HttpClient {
      * @param op {@link ClientOption}
      */
     newContext(op?: ClientOption): HttpClient {
-        return new HttpResolverContext(Object.assign({}, this._op, op));
+        return new HttpResolverContext(Object.assign({}, this._defaultClientOption, this._op, op));
     }
     get(url: string, op?: RequestOption & ClientOption
         & { redirectAsNewRequest?: boolean, responseType: "string" }): Promise<HttpResponse<string>>;
