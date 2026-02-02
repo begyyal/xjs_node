@@ -151,7 +151,7 @@ export class HttpResolverContext implements HttpClient {
             params.headers["content-type"] ??= "application/octet-stream";
         } else if (UType.isObject(payload)) {
             p = JSON.stringify(payload);
-            params.headers["content-length"] = (p as string).length;
+            params.headers["content-length"] = Buffer.byteLength(p);
             params.headers["content-type"] = "application/json";
         }
         return await this.reqHttps(u, params, p);
