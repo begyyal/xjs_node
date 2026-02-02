@@ -13,7 +13,7 @@ export interface ProxyConfig {
 }
 export class HttpResolver implements HttpClient {
     private readonly _defaultClientOption: ClientOption = {
-        cmv: 141,
+        cmv: 143,
         logger: console,
         logLevel: "warn"
     };
