@@ -201,7 +201,7 @@ export class HttpResolverContext implements HttpClient {
                 const stream = fs.createWriteStream(dest);
                 res.pipe(stream);
                 stream.on("finish", () => stream.close());
-                stream.on("close", () => resolve({ headers: res.headers }));
+                stream.on("close", () => resolve({ headers: res.headers, status: res.statusCode } as HttpResponse));
                 stream.on("error", e => this.handleError(reject, e, "an error occurred on donwloading stream."));
                 return;
             } catch (e) {
