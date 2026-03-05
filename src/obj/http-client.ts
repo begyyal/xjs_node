@@ -55,6 +55,10 @@ export interface HttpResponse<T = string> {
      * response payload which has a type depends on {@link RequestOption.responseType}.
      */
     payload?: T;
+    /**
+     * http status code.
+     */
+    status: number;
 }
 export interface HttpClient {
     /**

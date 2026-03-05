@@ -223,10 +223,7 @@ export class HttpResolverContext implements HttpClient {
                 else if (contentEncofing == "br")
                     retBuf = zlib.brotliDecompressSync(retBuf);
                 const data = rc.responseType === "buffer" ? retBuf : retBuf.toString("utf8");
-                if (sc !== 2) {
-                    if (UType.isString(data) && data.trim()) this.warn(data);
-                    reject(new XjsErr(s_errCode, `Https received an error status ${res.statusCode}`));
-                } else resolve({ payload: data, headers: res.headers });
+                resolve({ payload: data, headers: res.headers, status: res.statusCode } as HttpResponse<string | Buffer>);
             } catch (e) { this.handleError(reject, e, "something went wrong in processing response."); }
         });
     }
