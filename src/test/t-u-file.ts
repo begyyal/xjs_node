@@ -1,10 +1,8 @@
 import * as fs from "fs";
 import { joinPath } from "../func/u";
 import { UFile } from "../func/u-file";
-import { ModuleTest } from "./prc/module-test";
-import { TestCase } from "./prc/test-case";
-import { TestUnit } from "./prc/test-unut";
 import { UArray } from "xjs-common";
+import { ModuleTest, TestCase, TestUnit } from "xjs-test";
 
 const s_workingDir = joinPath(__dirname, "tmp");
 const mt = new ModuleTest("UFile");

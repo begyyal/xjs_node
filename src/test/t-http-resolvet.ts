@@ -1,8 +1,6 @@
+import { ModuleTest, TestCase, TestUnit } from "xjs-test";
 import { HttpClient } from "../obj/http-client";
 import { HttpResolver } from "../prcs/http-resolver";
-import { ModuleTest } from "./prc/module-test";
-import { TestCase } from "./prc/test-case";
-import { TestUnit } from "./prc/test-unut";
 
 const mt = new ModuleTest("HttpResolver");
 mt.appendUnit("get", function (this: TestUnit) {
