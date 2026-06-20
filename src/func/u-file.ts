@@ -71,11 +71,14 @@ export namespace UFile {
             else rj(new XjsErr(s_errCode, `No file found => ${f}`));
         });
     }
-    export function ls(p: MaybeArray<string>): string[] {
+    export function ls(p: MaybeArray<string>, withStats: true): { fname: string, stats: fs.Stats }[];
+    export function ls(p: MaybeArray<string>, withStats?: boolean): string[];
+    export function ls(p: MaybeArray<string>, withStats?: boolean): string[] | { fname: string, stats: fs.Stats }[] {
         const pt = joinPath(p)
         if (!pt || !fs.statSync(pt).isDirectory())
             throw new XjsErr(s_errCode, "Specified path for ls is not directory.");
-        return fs.readdirSync(pt);
+        const fnames = fs.readdirSync(pt);
+        return withStats ? fnames.map(f => ({ fname: f, stats: status([pt, f]) })) : fnames;
     }
     /**
      * check availability to export a file with specified directory and file name. 

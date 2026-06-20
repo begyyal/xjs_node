@@ -4,6 +4,7 @@ import { UFile } from "../func/u-file";
 import { ModuleTest } from "./prc/module-test";
 import { TestCase } from "./prc/test-case";
 import { TestUnit } from "./prc/test-unut";
+import { UArray } from "xjs-common";
 
 const s_workingDir = joinPath(__dirname, "tmp");
 const mt = new ModuleTest("UFile");
@@ -54,6 +55,15 @@ mt.appendUnit("[file manipulations 1]", function (this: TestUnit) {
     this.appendCase("mv", async function (this: TestCase) {
         await UFile.mv([s_workingDir, "a.json"], [s_workingDir, "c.txt"]);
         this.check(!UFile.exists([s_workingDir, "a.txt"]) && UFile.exists([s_workingDir, "c.txt"]));
+    });
+    this.appendCase("ls", async function (this: TestCase) {
+        const fnames = UFile.ls(s_workingDir);
+        this.check(UArray.eq(fnames, ["b.txt", "c.txt"]));
+    });
+    this.appendCase("ls with stats.", async function (this: TestCase) {
+        const stats = UFile.ls(s_workingDir, true);
+        this.check(UArray.eq(stats.map(s => s.fname), ["b.txt", "c.txt"]));
+        this.check(stats.map(s => s.stats).every(s => s.ctime instanceof Date));
     });
 });
 mt.appendUnit("reserveFilePath", function (this: TestUnit) {
