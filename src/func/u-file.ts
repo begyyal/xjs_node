@@ -18,7 +18,7 @@ export namespace UFile {
             throw new XjsErr(s_errCode, "Already exists a file (not directory) on the path.");
         return !e;
     }
-    export function write(p: MaybeArray<string>, c: string): Promise<void> {
+    export function write(p: MaybeArray<string>, c: string | NodeJS.ArrayBufferView): Promise<void> {
         return new Promise((rs, rj) => fs.writeFile(joinPath(p), c, e => e ? rj(e) : rs()));
     }
     /**

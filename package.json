@@ -1,7 +1,7 @@
 {
   "name": "xjs-node",
-  "version": "3.2.0",
-  "description": "library modules for nodejs + typescript that bundled general-purpose implementations.",
+  "version": "3.2.1",
+  "description": "library modules for nodejs + typescript that bundle general-purpose implementations.",
   "repository": {
     "type": "git",
     "url": "https://github.com/begyyal/xjs_node"

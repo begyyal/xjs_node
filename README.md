@@ -1,7 +1,7 @@
 [![npm][npm-badge]][npm-url] [![CI][ci-badge]][ci-url] [![publish][publish-badge]][publish-url]
 
 # Overview
-Library modules for nodejs + typescript that bundled general-purpose implementations.  
+Library modules for nodejs + typescript that bundle general-purpose implementations.  
 This module focuses on implementation that extends nodejs builtin modules, and dependency is only [xjs-common](https://github.com/begyyal/xjs_common).
 
 # Install
