@@ -71,7 +71,7 @@ export interface HttpClient {
     readonly cmv: number;
     /**
      * request GET to the url with new context.
-     * @param url target url. (currently https only)
+     * @param url target url. (currently http/https only)
      * @param op.headers http headers.
      * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.
      * @param op.proxy proxy configuration.
@@ -89,7 +89,7 @@ export interface HttpClient {
     get(url: string, op?: RequestOption & ClientOption & { redirectAsNewRequest?: boolean }): Promise<HttpResponse<string>>;
     /**
      * request POST to the url with new context.
-     * @param url target url. (currently https only)
+     * @param url target url. (currently http/https only)
      * @param payload request payload. if this is a Stream, pipe will be used, otherwise if an object, this is treated as json.
      * @param op.headers http headers.
      * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.
@@ -105,7 +105,7 @@ export interface HttpClient {
     post(url: string, payload: any, op?: RequestOption & ClientOption): Promise<HttpResponse<string>>;
     /**
      * request PUT to the url with new context.
-     * @param url target url. (currently https only)
+     * @param url target url. (currently http/https only)
      * @param payload request payload. if this is a Stream, pipe will be used, otherwise if an object, this is treated as json.
      * @param op.headers http headers.
      * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.

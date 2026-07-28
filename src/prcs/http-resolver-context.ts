@@ -169,7 +169,7 @@ export class HttpResolverContext implements HttpClient {
         }
         if (this._cookies) this.setCookies(params.headers as OutgoingHttpHeaders);
         return new Promise<HttpResponse>((resolve, reject) => {
-            const req = requestTls(params,
+            const req = (u.protocol === "https:" ? requestTls : request)(params,
                 (res: IncomingMessage) => this.processResponse(resolve, reject, rc, params.host, res));
             req.on('error', e => this.handleError(reject, e, "an error occurred on the request."));
             req.on('timeout', () => {
