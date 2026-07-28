@@ -42,7 +42,7 @@ const s_mode2headers = new Map<ClientMode, (cmv: number) => (Record<string, stri
         const uad = cmv < 130
             ? `"Not/A)Brand";v="8", "Chromium";v="${cmv}", "Google Chrome";v="${cmv}"`
             : `"Chromium";v="${cmv}", "Not:A-Brand";v="24", "Google Chrome";v="${cmv}"`;
-        const ch = {
+        const ch: Record<string, string> = {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
             "accept-encoding": "gzip, deflate, br, zstd",
             "accept-language": "en-US,en;q=0.9",
@@ -67,19 +67,19 @@ export class HttpResolverContext implements HttpClient {
     private readonly _als = new AsyncLocalStorage<RequestContext>();
     private readonly _l: Loggable;
     private readonly _logLevel: number;
-    private readonly _ciphers: string;
+    private readonly _ciphers: string | undefined;
     private readonly _proxyConfig?: ProxyConfig;
-    private readonly _chHeaders: Record<string, string>;
+    private readonly _chHeaders: Record<string, string> | undefined;
     private _cookies?: Record<string, string>;
     constructor(op: ClientOption) {
         this.mode = op.mode ?? UArray.randomPick([s_clientMode.chrome, s_clientMode.firefox]);
-        this.cmv = op.cmv;
+        this.cmv = op.cmv!;
         this._proxyConfig = op.proxy;
-        this._l = op.logger;
-        this._logLevel = s_logLevelMap.get(op.logLevel);
+        this._l = op.logger!;
+        this._logLevel = s_logLevelMap.get(op.logLevel!)!;
         if (this.mode.id > 0) {
             this._ciphers = this.createCiphers(this.mode);
-            this._chHeaders = s_mode2headers.get(this.mode)(this.cmv);
+            this._chHeaders = s_mode2headers.get(this.mode)?.(this.cmv);
         }
     }
     get(url: string, op?: RequestOption & { outerRedirectCount?: number, responseType: "string" }): Promise<HttpResponse<string>>;
@@ -113,9 +113,9 @@ export class HttpResolverContext implements HttpClient {
         return await this._als.run(rc, this.postputIn, u, HttpMethod.Put, payload).finally(() => proxyAgent?.destroy());
     }
     private createProxyAgent(u: URL): Promise<Agent> {
-        const conf = this._proxyConfig;
+        const conf = this._proxyConfig!;
         return new Promise((resolve, reject) => {
-            const headers = {}
+            const headers: Record<string, string> = {}
             if (conf.auth) headers['proxy-authorization'] = `Basic ${Buffer.from(conf.auth.name + ':' + conf.auth.pass).toString('base64')}`;
             const req = request({
                 host: conf.server,
@@ -137,14 +137,14 @@ export class HttpResolverContext implements HttpClient {
     }
     private getIn = async (u: URL): Promise<HttpResponse> => {
         const params: RequestOptions = {};
-        const rc = this._als.getStore();
+        const rc = this._als.getStore()!;
         params.method = HttpMethod.Get;
         params.headers = UHttp.normalizeHeaders(rc.headers);
         return await this.reqHttps(u, params);
     };
     private postputIn = async (u: URL, method: HttpMethod.Post | HttpMethod.Put, payload: any): Promise<HttpResponse> => {
         const params: RequestOptions = {};
-        const rc = this._als.getStore();
+        const rc = this._als.getStore()!;
         params.method = method;
         params.headers = UHttp.normalizeHeaders(rc.headers);
         let p = payload;
@@ -158,7 +158,7 @@ export class HttpResolverContext implements HttpClient {
         return await this.reqHttps(u, params, p);
     }
     private reqHttps(u: URL, params: RequestOptions, payload?: any): Promise<HttpResponse> {
-        const rc = this._als.getStore();
+        const rc = this._als.getStore()!;
         params.timeout = rc.timeout ?? 0;
         params.protocol = u.protocol;
         params.host = u.host;
@@ -171,7 +171,7 @@ export class HttpResolverContext implements HttpClient {
         if (this._cookies) this.setCookies(params.headers as OutgoingHttpHeaders);
         return new Promise<HttpResponse>((resolve, reject) => {
             const req = (u.protocol === "https:" ? requestTls : request)(params,
-                (res: IncomingMessage) => this.processResponse(resolve, reject, rc, params.host, res));
+                (res: IncomingMessage) => this.processResponse(resolve, reject, rc, params.host!, res));
             req.on('error', e => this.handleError(reject, e, "an error occurred on the request."));
             req.on('timeout', () => {
                 req.destroy();
@@ -191,21 +191,21 @@ export class HttpResolverContext implements HttpClient {
         host: string,
         res: IncomingMessage): void {
         if (res.headers["set-cookie"]) this.storeCookies(res.headers["set-cookie"]);
-        const sc = UHttp.statusCategoryOf(res.statusCode);
+        const sc = res.statusCode ? UHttp.statusCategoryOf(res.statusCode) : -1;
         if (sc === 3) {
             this.handleRedirect(res, host).then(resolve).catch(reject).finally(() => res.destroy());
             return;
         }
         if (res.headers["content-disposition"]?.trim().startsWith("attachment")) {
             try {
-                const dest = this.resolveDownloadPath(rc.downloadPath, res.headers["content-disposition"]);
+                const dest = this.resolveDownloadPath(res.headers["content-disposition"], rc.downloadPath);
                 const stream = fs.createWriteStream(dest);
                 res.pipe(stream);
                 stream.on("finish", () => stream.close());
                 stream.on("close", () => resolve({ headers: res.headers, status: res.statusCode } as HttpResponse));
                 stream.on("error", e => this.handleError(reject, e, "an error occurred on donwloading stream."));
                 return;
-            } catch (e) {
+            } catch (e: any) {
                 if (e instanceof XjsNodeErr) reject(e);
                 else {
                     this.error(e);
@@ -228,7 +228,7 @@ export class HttpResolverContext implements HttpClient {
             } catch (e) { this.handleError(reject, e, "something went wrong in processing response."); }
         });
     }
-    private resolveDownloadPath(opPath: string, disposition: string): string {
+    private resolveDownloadPath(disposition: string, opPath?: string): string {
         const appendFname = (d: string) => {
             const fname = disposition.split(";")
                 .find(f => f.trim().startsWith("filename"))
@@ -252,7 +252,7 @@ export class HttpResolverContext implements HttpClient {
         return appendFname("./");
     }
     private async handleRedirect(res: IncomingMessage, host: string): Promise<HttpResponse> {
-        const rc = this._als.getStore();
+        const rc = this._als.getStore()!;
         if (!res.headers.location) throw new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Received http redirection, but no location header found.");
         if (rc.redirectCount++ > s_redirectLimit) throw new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Count of http redirection exceeds limit.");
         this.log(`Redirect to ${res.headers.location}. (count is ${rc.redirectCount})`);
@@ -276,34 +276,34 @@ export class HttpResolverContext implements HttpClient {
         ].join(':');
     }
     private setCookies(headers: OutgoingHttpHeaders): void {
-        const exp = this._cookies["expires"];
+        const exp = this._cookies?.["expires"];
         if (exp && new Date(exp).getTime() <= Date.now()) {
-            this._cookies = null;
+            this._cookies = undefined;
             this.log("Cookies was cleared due to an expiraion.");
-        } else headers.cookie = Object.keys(this._cookies)
+        } else if (this._cookies) headers.cookie = Object.keys(this._cookies)
             .filter(ckk => !["expires", "max-age"].includes(ckk))
-            .map(ckk => `${ckk}=${this._cookies[ckk]};`).join(" ");
+            .map(ckk => `${ckk}=${this._cookies![ckk]};`).join(" ");
     }
     private storeCookies(cookies: string[]): void {
         this._cookies ??= {};
         cookies.filter(c => c).flatMap(c => c.split(";"))
             .map(c => {
                 const idx = c.indexOf("=");
-                return idx !== -1 && [c.substring(0, idx).toLowerCase().trim(), c.substring(idx + 1)];
+                return idx !== -1 ? [c.substring(0, idx).toLowerCase().trim(), c.substring(idx + 1)] : null;
             })
             .filter(cp => cp && cp[0] && !["secure", "path", "domain", "samesite"].includes(cp[0]))
-            .forEach(cp => this._cookies[cp[0]] = cp[1]);
+            .forEach(cp => this._cookies![cp![0]] = cp![1]);
         this.log("Store cookies from set-cookie headers.");
         this.log(JSON.stringify(this._cookies));
     }
     private log(msg: string): void {
-        if (s_logLevelMap.get("log") <= this._logLevel) this._l.log(`[http-resolver] ${msg}`);
+        if (s_logLevelMap.get("log")! <= this._logLevel) this._l.log(`[http-resolver] ${msg}`);
     }
     private warn(msg: string): void {
-        if (s_logLevelMap.get("warn") <= this._logLevel) this._l.warn(`[http-resolver] ${msg}`);
+        if (s_logLevelMap.get("warn")! <= this._logLevel) this._l.warn(`[http-resolver] ${msg}`);
     }
     private error(msg: string): void {
-        if (s_logLevelMap.get("error") <= this._logLevel) this._l.error(`[http-resolver] ${msg}`);
+        if (s_logLevelMap.get("error")! <= this._logLevel) this._l.error(`[http-resolver] ${msg}`);
     }
     private handleError(rj: (r: any) => void, e: any, msg: string): void {
         rj(new XjsNodeErr(XjsNodeErrCode.HttpResolver, msg, e));

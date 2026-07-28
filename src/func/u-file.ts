@@ -35,7 +35,7 @@ export namespace UFile {
     /**
      * return a file status. if the file of the status doesn't exist, this returns `null`.
      */
-    export function status(p: MaybeArray<string>): fs.Stats {
+    export function status(p: MaybeArray<string>): fs.Stats | null {
         const pt = joinPath(p);
         return fs.existsSync(pt) ? fs.statSync(pt) : null;
     }
@@ -78,7 +78,7 @@ export namespace UFile {
         if (!pt || !fs.statSync(pt).isDirectory())
             throw new XjsNodeErr(XjsNodeErrCode.UFile, "Specified path for ls is not directory.");
         const fnames = fs.readdirSync(pt);
-        return withStats ? fnames.map(f => ({ fname: f, stats: status([pt, f]) })) : fnames;
+        return withStats ? fnames.map(f => ({ fname: f, stats: status([pt, f])! })) : fnames;
     }
     /**
      * check availability to export a file with specified directory and file name. 

@@ -24,7 +24,7 @@ export class HttpResolver implements HttpClient {
      */
     constructor(private readonly _op: ClientOption = this._defaultClientOption) {
         this.mode = this._op.mode;
-        this.cmv = this._op.cmv;
+        this.cmv = this._op.cmv ?? this._defaultClientOption.cmv!;
     }
     /**
      * create a http client as new context that keeps some states. (browser type, cookies, ciphers order, etc...)

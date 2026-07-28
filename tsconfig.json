@@ -7,7 +7,11 @@
     "removeComments": false,
     "experimentalDecorators": true,
     "declaration": true,
-    "outDir": "build"
+    "rootDir": ".",
+    "outDir": "build",
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/**/*.ts"
