@@ -158,10 +158,11 @@ export class HttpResolverContext implements HttpClient {
         return await this.reqHttps(u, params, p);
     }
     private reqHttps(u: URL, params: RequestOptions, payload?: any): Promise<HttpResponse> {
-        const rc = this._als.getStore()!;
+        const rc = this._als.getStore()!, isHttps = u.protocol === "https:";
         params.timeout = rc.timeout ?? 0;
         params.protocol = u.protocol;
-        params.host = u.host;
+        params.hostname = u.hostname;
+        params.port = u.port || (isHttps ? 443 : 80);
         params.path = (rc.ignoreQuery || !u.search) ? u.pathname : `${u.pathname}${u.search}`;
         params.agent = rc.proxyAgent;
         if (this.mode.id > 0) {
@@ -170,7 +171,7 @@ export class HttpResolverContext implements HttpClient {
         }
         if (this._cookies) this.setCookies(params.headers as OutgoingHttpHeaders);
         return new Promise<HttpResponse>((resolve, reject) => {
-            const req = (u.protocol === "https:" ? requestTls : request)(params,
+            const req = (isHttps ? requestTls : request)(params,
                 (res: IncomingMessage) => this.processResponse(resolve, reject, rc, params.host!, res));
             req.on('error', e => this.handleError(reject, e, "an error occurred on the request."));
             req.on('timeout', () => {
