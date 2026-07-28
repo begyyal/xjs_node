@@ -1,9 +1,9 @@
 import { execSync } from "child_process";
 import * as fs from "fs";
-import { MaybeArray, XjsErr } from "xjs-common";
+import { MaybeArray } from "xjs-common";
 import { joinPath } from "./u";
-
-const s_errCode = 1040;
+import { XjsNodeErr } from "../obj/xjs-node-err";
+import { XjsNodeErrCode } from "../const/xjs-node-err-code";
 
 export namespace UFile {
     /** 
@@ -15,7 +15,7 @@ export namespace UFile {
         const e = fs.existsSync(dirPath);
         if (!e) fs.mkdirSync(dirPath, { recursive: true });
         else if (!fs.statSync(dirPath).isDirectory())
-            throw new XjsErr(s_errCode, "Already exists a file (not directory) on the path.");
+            throw new XjsNodeErr(XjsNodeErrCode.UFile, "Already exists a file (not directory) on the path.");
         return !e;
     }
     export function write(p: MaybeArray<string>, c: string | NodeJS.ArrayBufferView): Promise<void> {
@@ -45,7 +45,7 @@ export namespace UFile {
         return new Promise((rs, rj) => {
             const f = joinPath(p);
             if (fs.existsSync(f)) fs.readFile(f, encoding, (e, d) => e ? rj(e) : rs(d));
-            else rj(new XjsErr(s_errCode, `No file found => ${f}`));
+            else rj(new XjsNodeErr(XjsNodeErrCode.UFile, `No file found => ${f}`));
         })
     }
     /**
@@ -61,14 +61,14 @@ export namespace UFile {
         return new Promise((rs, rj) => {
             const f = joinPath(from), t = joinPath(to);
             if (fs.existsSync(f)) fs.copyFile(f, t, e => e ? rj(e) : rs());
-            else rj(new XjsErr(s_errCode, `No file found => ${f}`));
+            else rj(new XjsNodeErr(XjsNodeErrCode.UFile, `No file found => ${f}`));
         });
     }
     export function mv(from: MaybeArray<string>, to: MaybeArray<string>): Promise<void> {
         return new Promise((rs, rj) => {
             const f = joinPath(from), t = joinPath(to);
             if (fs.existsSync(f)) fs.rename(f, t, e => e ? rj(e) : rs());
-            else rj(new XjsErr(s_errCode, `No file found => ${f}`));
+            else rj(new XjsNodeErr(XjsNodeErrCode.UFile, `No file found => ${f}`));
         });
     }
     export function ls(p: MaybeArray<string>, withStats: true): { fname: string, stats: fs.Stats }[];
@@ -76,7 +76,7 @@ export namespace UFile {
     export function ls(p: MaybeArray<string>, withStats?: boolean): string[] | { fname: string, stats: fs.Stats }[] {
         const pt = joinPath(p)
         if (!pt || !fs.statSync(pt).isDirectory())
-            throw new XjsErr(s_errCode, "Specified path for ls is not directory.");
+            throw new XjsNodeErr(XjsNodeErrCode.UFile, "Specified path for ls is not directory.");
         const fnames = fs.readdirSync(pt);
         return withStats ? fnames.map(f => ({ fname: f, stats: status([pt, f]) })) : fnames;
     }
@@ -89,9 +89,9 @@ export namespace UFile {
     export function reserveFilePath(dir: MaybeArray<string>, fname: string): string {
         const pt = joinPath(dir);
         if (!pt || !fs.statSync(pt).isDirectory())
-            throw new XjsErr(s_errCode, "Specified directory path is not directory.");
+            throw new XjsNodeErr(XjsNodeErrCode.UFile, "Specified directory path is not directory.");
         if (!fname || fname.match(/[\\/:*?"<>|]/))
-            throw new XjsErr(s_errCode, "Specified filename is invalid due to empty or including disallowed characters.");
+            throw new XjsNodeErr(XjsNodeErrCode.UFile, "Specified filename is invalid due to empty or including disallowed characters.");
         let dest = joinPath(pt, fname), i = 1;
         while (fs.existsSync(dest)) {
             const ext = fname.match(/^(.+)(\.[^\.]+)$/);
@@ -106,8 +106,8 @@ export namespace UFile {
      * @param destDir directory that the decompress files export to.
      */
     export function unzip(zipPath: MaybeArray<string>, destDir?: MaybeArray<string>): void {
-        if (!exists(zipPath)) throw new XjsErr(s_errCode, "There is no file on the zip path.");
-        if (!!destDir && !exists(destDir)) throw new XjsErr(s_errCode, "The destination directory is not found.");
+        if (!exists(zipPath)) throw new XjsNodeErr(XjsNodeErrCode.UFile, "There is no file on the zip path.");
+        if (!!destDir && !exists(destDir)) throw new XjsNodeErr(XjsNodeErrCode.UFile, "The destination directory is not found.");
         let cmd = "unzip", options = null, availableCmd = true;
         if (destDir) options = `-d "${destDir}"`;
         const check = () => { try { execSync(`${cmd} --help`, { stdio: "ignore" }); } catch { availableCmd = false; } };
@@ -119,10 +119,10 @@ export namespace UFile {
                 check();
             }
         } else if (process.platform === "linux") {
-        } else throw new XjsErr(s_errCode, "The os running on is not supported for xjs unzip.");
-        if (!availableCmd) throw new XjsErr(s_errCode, `"${cmd}" command is not installed.`);
+        } else throw new XjsNodeErr(XjsNodeErrCode.UFile, "The os running on is not supported for xjs unzip.");
+        if (!availableCmd) throw new XjsNodeErr(XjsNodeErrCode.UFile, `"${cmd}" command is not installed.`);
         try { execSync([cmd, options, `"${zipPath}"`].filter(e => e).join(" "), { stdio: "ignore" }); } catch (e) {
-            throw new XjsErr(s_errCode, "Something went wrong at unzip.", e);
+            throw new XjsNodeErr(XjsNodeErrCode.UFile, "Something went wrong at unzip.", e);
         }
     }
 }

@@ -1,6 +1,6 @@
-import { XjsErr } from "xjs-common";
 import { HttpResolverContext } from "./http-resolver-context";
 import { ClientOption, HttpResponse, HttpClient, RequestOption } from "../obj/http-client";
+import { XjsNodeErr } from "../obj/xjs-node-err";
 
 export interface ClientMode {
     id: number;
@@ -13,7 +13,7 @@ export interface ProxyConfig {
 }
 export class HttpResolver implements HttpClient {
     private readonly _defaultClientOption: ClientOption = {
-        cmv: 143,
+        cmv: 149,
         logger: console,
         logLevel: "warn"
     };
@@ -48,7 +48,7 @@ export class HttpResolver implements HttpClient {
         try {
             return await this.newContext(op).get(url, bindOp());
         } catch (e) {
-            if (!(e instanceof XjsErr) || e.code !== -1) throw e;
+            if (!(e instanceof XjsNodeErr) || e.code !== -1) throw e;
             else return await this.newContext(op).get(e.message, bindOp());
         }
     }

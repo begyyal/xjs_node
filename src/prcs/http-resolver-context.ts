@@ -10,8 +10,10 @@ import { ClientMode, ProxyConfig } from "./http-resolver";
 import { ClientOption, HttpResponse, HttpClient, RequestOption, LogLevel } from "../obj/http-client";
 import { UFile } from "../func/u-file";
 import { joinPath } from "../func/u";
-import { HttpMethod, Loggable, UArray, UHttp, UString, UType, XjsErr } from "xjs-common";
+import { HttpMethod, Loggable, UArray, UHttp, UString, UType } from "xjs-common";
 import { Stream } from "stream";
+import { XjsNodeErrCode } from "../const/xjs-node-err-code";
+import { XjsNodeErr } from "../obj/xjs-node-err";
 
 interface RequestContext extends RequestOption {
     redirectCount: number;
@@ -23,7 +25,6 @@ export const s_clientMode = {
     chrome: { id: 1, cipherOrder: [2, 0, 1] },
     firefox: { id: 2, cipherOrder: [2, 1, 0] }
 };
-const s_errCode = 1200;
 const s_redirectLimit = 5;
 const s_mode2headers = new Map<ClientMode, (cmv: number) => (Record<string, string>)>([
     [s_clientMode.firefox, (cmv: number) => ({
@@ -124,12 +125,12 @@ export class HttpResolverContext implements HttpClient {
                 headers
             }).on('connect', (res, socket) => {
                 if (res.statusCode === 200) resolve(new Agent({ socket, keepAlive: true }));
-                else reject(new XjsErr(s_errCode, "Could not connect to proxy."));
+                else reject(new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Could not connect to proxy."));
             });
             req.on('error', e => this.handleError(reject, e, "an error occurred on the CONNECT request."));
             req.on('timeout', () => {
                 req.destroy();
-                reject(new XjsErr(s_errCode, "The http request timeout, maybe server did not respond."));
+                reject(new XjsNodeErr(XjsNodeErrCode.HttpResolver, "The http request timeout, maybe server did not respond."));
             });
             req.end();
         });
@@ -174,7 +175,7 @@ export class HttpResolverContext implements HttpClient {
             req.on('error', e => this.handleError(reject, e, "an error occurred on the request."));
             req.on('timeout', () => {
                 req.destroy();
-                reject(new XjsErr(s_errCode, "The http request timeout, maybe server did not respond."));
+                reject(new XjsNodeErr(XjsNodeErrCode.HttpResolver, "The http request timeout, maybe server did not respond."));
             });
             if (payload instanceof Stream) payload.pipe(req, { end: true });
             else if (!payload) req.end();
@@ -205,10 +206,10 @@ export class HttpResolverContext implements HttpClient {
                 stream.on("error", e => this.handleError(reject, e, "an error occurred on donwloading stream."));
                 return;
             } catch (e) {
-                if (e instanceof XjsErr) reject(e);
+                if (e instanceof XjsNodeErr) reject(e);
                 else {
                     this.error(e);
-                    reject(new XjsErr(s_errCode, "Failed to download a file."));
+                    reject(new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Failed to download a file."));
                 }
             }
         }
@@ -238,11 +239,13 @@ export class HttpResolverContext implements HttpClient {
         if (opPath) {
             const st = UFile.status(opPath);
             if (!st || st.isFile()) {
-                if (!UFile.exists(path.dirname(opPath))) throw new XjsErr(s_errCode, "Directory of the download file was not found.");
+                if (!UFile.exists(path.dirname(opPath)))
+                    throw new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Directory of the download file was not found.");
                 return opPath;
             }
             if (st.isDirectory()) {
-                if (!UFile.exists(opPath)) throw new XjsErr(s_errCode, "Directory of the download path was not found.");
+                if (!UFile.exists(opPath))
+                    throw new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Directory of the download path was not found.");
                 return appendFname(opPath);
             }
         }
@@ -250,11 +253,11 @@ export class HttpResolverContext implements HttpClient {
     }
     private async handleRedirect(res: IncomingMessage, host: string): Promise<HttpResponse> {
         const rc = this._als.getStore();
-        if (!res.headers.location) throw new XjsErr(s_errCode, "Received http redirection, but no location header found.");
-        if (rc.redirectCount++ > s_redirectLimit) throw new XjsErr(s_errCode, "Count of http redirection exceeds limit.");
+        if (!res.headers.location) throw new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Received http redirection, but no location header found.");
+        if (rc.redirectCount++ > s_redirectLimit) throw new XjsNodeErr(XjsNodeErrCode.HttpResolver, "Count of http redirection exceeds limit.");
         this.log(`Redirect to ${res.headers.location}. (count is ${rc.redirectCount})`);
         const dest = res.headers.location.startsWith("http") ? res.headers.location : `https://${host}${res.headers.location}`;
-        if (rc.outerRedirectCount) throw new XjsErr(-1, dest);
+        if (rc.outerRedirectCount) throw new XjsNodeErr(-1, dest);
         const u = new URL(dest);
         // consider for proxy which implements reverse proxy.
         if (rc.proxyAgent) {
@@ -303,6 +306,6 @@ export class HttpResolverContext implements HttpClient {
         if (s_logLevelMap.get("error") <= this._logLevel) this._l.error(`[http-resolver] ${msg}`);
     }
     private handleError(rj: (r: any) => void, e: any, msg: string): void {
-        rj(new XjsErr(s_errCode, msg, e));
+        rj(new XjsNodeErr(XjsNodeErrCode.HttpResolver, msg, e));
     }
 }
