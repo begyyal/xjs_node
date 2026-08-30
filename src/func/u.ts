@@ -1,7 +1,8 @@
+import { createRequire } from "node:module";
+import { isSea } from "node:sea";
 import * as path from "path";
 import { MaybeArray, UType } from "xjs-common";
-
-const s_errCode = 1010;
+import { UFile } from "./u-file";
 
 export function checkPortAvailability(port: number): Promise<boolean> {
     return new Promise(resolve => {
@@ -13,4 +14,9 @@ export function checkPortAvailability(port: number): Promise<boolean> {
 }
 export function joinPath(...p: MaybeArray<string>[]): string {
     return path.join(...p.flatMap(UType.takeAsArray));
+}
+export function externalRequire<T = any>(packageName: string, modulePath: MaybeArray<string>): T | undefined {
+    const execDir = isSea() ? path.dirname(process.execPath) : process.cwd();
+    const p = joinPath(execDir, "node_modules", packageName, modulePath);
+    return UFile.exists(p) ? createRequire(joinPath(execDir, 'index.js'))(p) : undefined
 }
