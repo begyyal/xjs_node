@@ -33,7 +33,7 @@ export interface RequestOption {
      */
     ignoreQuery?: boolean;
     /**
-     * destination directory or file path for download. this is only used when `Content-Disposition` header exists. 
+     * destination directory or file path for download. this is only used when `Content-Disposition` header exists. \
      * default is current directory of the process with `filename` of the disposition.
      */
     downloadPath?: string;

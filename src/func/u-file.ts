@@ -7,7 +7,7 @@ import { XjsNodeErrCode } from "../const/xjs-node-err-code";
 
 export namespace UFile {
     /** 
-     * make directory. this raise no error if the directory to be made exists.
+     * make directory. this raise no error if the directory to be made exists. \
      * this returns boolean whether mkdir was executed or not.
      */
     export function mkdir(p: MaybeArray<string>): boolean {
@@ -81,7 +81,7 @@ export namespace UFile {
         return withStats ? fnames.map(f => ({ fname: f, stats: status([pt, f])! })) : fnames;
     }
     /**
-     * check availability to export a file with specified directory and file name. 
+     * check availability to export a file with specified directory and file name. \
      * if it doesn't, this retries to check after appending incremental number to the filename excluding an extension (e.g. `aaa_1.txt`).
      * @param dir destination directory path.
      * @param fname file name wanna export to.
@@ -100,7 +100,7 @@ export namespace UFile {
         return dest;
     }
     /**
-     * decompress zip file. this depends on os enviroment due to using the os command.
+     * decompress zip file. this depends on os enviroment due to using the os command. \
      * currently this supports only windows (installed `tar` or `unzip` in gnu compiler) and linux systems (installed `unzip`). 
      * @param zipPath zip file to be unzipped.
      * @param destDir directory that the decompress files export to.
