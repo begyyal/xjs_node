@@ -118,4 +118,33 @@ export interface HttpClient {
     put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
     put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
     put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string>>;
+    /**
+     * request PATCH to the url with new context.
+     * @param url target url. (currently http/https only)
+     * @param payload request payload. if this is a Stream, pipe will be used, otherwise if an object, this is treated as json.
+     * @param op.headers http headers.
+     * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.
+     * @param op.proxy proxy configuration.
+     * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
+     * @param op.timeout {@link RequestOption.timeout}
+     * @param op.responseType {@link RequestOption.responseType}
+     * @returns http response. {@link HttpResponse}
+     */
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string>>;
+    /**
+     * request DELETE to the url with new context.
+     * @param url target url. (currently http/https only)
+     * @param op.headers http headers.
+     * @param op.mode {@link s_clientMode} that is imitated. default is random between chrome or firefox.
+     * @param op.proxy proxy configuration.
+     * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
+     * @param op.timeout {@link RequestOption.timeout}
+     * @param op.responseType {@link RequestOption.responseType}
+     * @returns http response. {@link HttpResponse}
+    */
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string>>;
 }

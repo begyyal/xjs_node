@@ -64,4 +64,17 @@ export class HttpResolver implements HttpClient {
     async put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string | Buffer>> {
         return await this.newContext(op).put(url, payload, op);
     }
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string>>;
+    async patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string | Buffer>> {
+        return await this.newContext(op).patch(url, payload, op);
+    }
+
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string>>;
+    async delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption): Promise<HttpResponse<string | Buffer>> {
+        return await this.newContext(op).delete(url, op);
+    }
 }

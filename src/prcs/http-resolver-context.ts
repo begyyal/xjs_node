@@ -90,7 +90,7 @@ export class HttpResolverContext implements HttpClient {
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
         const rc = { redirectCount: op?.outerRedirectCount ?? 0, proxyAgent };
         Object.assign(rc, op);
-        return await this._als.run(rc, this.getIn, u).finally(() => proxyAgent?.destroy());
+        return await this._als.run(rc, this.gdIn, u, HttpMethod.Get).finally(() => proxyAgent?.destroy());
     }
     post(url: string, payload: any, op?: RequestOption & { responseType: "string" }): Promise<HttpResponse<string>>;
     post(url: string, payload: any, op?: RequestOption & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
@@ -100,7 +100,7 @@ export class HttpResolverContext implements HttpClient {
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
         const rc = { redirectCount: 0, proxyAgent };
         Object.assign(rc, op);
-        return await this._als.run(rc, this.postputIn, u, HttpMethod.Post, payload).finally(() => proxyAgent?.destroy());
+        return await this._als.run(rc, this.pppIn, u, HttpMethod.Post, payload).finally(() => proxyAgent?.destroy());
     }
     put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & { responseType: "string" }): Promise<HttpResponse<string>>;
     put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
@@ -110,7 +110,27 @@ export class HttpResolverContext implements HttpClient {
         const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
         const rc = { redirectCount: 0, proxyAgent };
         Object.assign(rc, op);
-        return await this._als.run(rc, this.postputIn, u, HttpMethod.Put, payload).finally(() => proxyAgent?.destroy());
+        return await this._als.run(rc, this.pppIn, u, HttpMethod.Put, payload).finally(() => proxyAgent?.destroy());
+    }
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & { responseType: "string" }): Promise<HttpResponse<string>>;
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath">): Promise<HttpResponse<string>>;
+    async patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath">): Promise<HttpResponse<string | Buffer>> {
+        const u = new URL(url);
+        const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
+        const rc = { redirectCount: 0, proxyAgent };
+        Object.assign(rc, op);
+        return await this._als.run(rc, this.pppIn, u, HttpMethod.Patch, payload).finally(() => proxyAgent?.destroy());
+    }
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & { responseType: "string" }): Promise<HttpResponse<string>>;
+    delete(url: string, op?: Omit<RequestOption, "downloadPath"> & { responseType: "buffer" }): Promise<HttpResponse<Buffer>>;
+    delete(url: string, op?: Omit<RequestOption, "downloadPath">): Promise<HttpResponse<string>>;
+    async delete(url: string, op?: Omit<RequestOption, "downloadPath">): Promise<HttpResponse<string | Buffer>> {
+        const u = new URL(url);
+        const proxyAgent = this._proxyConfig && await this.createProxyAgent(u);
+        const rc = { redirectCount: 0, proxyAgent };
+        Object.assign(rc, op);
+        return await this._als.run(rc, this.gdIn, u, HttpMethod.Delete).finally(() => proxyAgent?.destroy());
     }
     private createProxyAgent(u: URL): Promise<Agent> {
         const conf = this._proxyConfig!;
@@ -135,14 +155,14 @@ export class HttpResolverContext implements HttpClient {
             req.end();
         });
     }
-    private getIn = async (u: URL): Promise<HttpResponse> => {
+    private gdIn = async (u: URL, method: HttpMethod.Get | HttpMethod.Delete): Promise<HttpResponse> => {
         const params: RequestOptions = {};
         const rc = this._als.getStore()!;
-        params.method = HttpMethod.Get;
+        params.method = method;
         params.headers = UHttp.normalizeHeaders(rc.headers);
         return await this.reqHttps(u, params);
     };
-    private postputIn = async (u: URL, method: HttpMethod.Post | HttpMethod.Put, payload: any): Promise<HttpResponse> => {
+    private pppIn = async (u: URL, method: HttpMethod.Post | HttpMethod.Put | HttpMethod.Patch, payload: any): Promise<HttpResponse> => {
         const params: RequestOptions = {};
         const rc = this._als.getStore()!;
         params.method = method;
@@ -265,7 +285,7 @@ export class HttpResolverContext implements HttpClient {
             rc.proxyAgent?.destroy();
             rc.proxyAgent = await this.createProxyAgent(u);
         }
-        return await this.getIn(u);
+        return await this.gdIn(u, HttpMethod.Get);
     }
     private createCiphers(mode: ClientMode): string {
         const defaultCiphers = tls.DEFAULT_CIPHERS.split(':');
