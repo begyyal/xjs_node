@@ -5,46 +5,36 @@ import { Loggable } from "xjs-common";
 
 export type LogLevel = "log" | "warn" | "error";
 export interface ClientOption {
-    /**
-     * {@link s_clientMode} that is imitated. default is random between chrome or firefox.
-     */
+    /** {@link s_clientMode} that is imitated. default is random between chrome or firefox. */
     mode?: ClientMode;
-    /**
-     * proxy configuration.
-     */
+    /** proxy configuration. */
     proxy?: ProxyConfig;
-    /**
-     * chrome major version refered when construct an user agent.
-     */
+    /** chrome major version refered when construct an user agent. */
     cmv?: number;
-    /**
-     * custom logger. default is `console`.
-     */
+    /** custom logger. default is `console`. */
     logger?: Loggable;
-    /**
-     * verbosity of logging.
-     */
+    /** verbosity of logging. */
     logLevel?: LogLevel;
 }
 export interface RequestOption {
     headers?: OutgoingHttpHeaders;
-    /**
-     * if true, query part in the `url` is ignored.
-     */
+    /** if true, query part in the `url` is ignored. */
     ignoreQuery?: boolean;
     /**
      * destination directory or file path for download. this is only used when `Content-Disposition` header exists. \
      * default is current directory of the process with `filename` of the disposition.
      */
     downloadPath?: string;
-    /**
-     * timeout milliseconds to wait for socket inactivity. default is infinity.
-     */
+    /** timeout milliseconds to wait for socket inactivity. default is infinity. */
     timeout?: number;
-    /**
-     * type of response payload. default is string (utf-8).
-     */
+    /** type of response payload. default is string (utf-8). */
     responseType?: "string" | "buffer";
+    /**
+     * allows only successful range of http status (200~). \
+     * if the status other than the range is returned, it throws an error. \
+     * this is disabled as default.
+    */
+    only2xx?: boolean;
 }
 export interface HttpResponse<T = string> {
     /**

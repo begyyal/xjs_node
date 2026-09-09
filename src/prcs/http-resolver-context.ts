@@ -213,11 +213,13 @@ export class HttpResolverContext implements HttpClient {
         res: IncomingMessage): void {
         if (res.headers["set-cookie"]) this.storeCookies(res.headers["set-cookie"]);
         const sc = res.statusCode ? UHttp.statusCategoryOf(res.statusCode) : -1;
-        if (sc === 3) {
+        if (rc.only2xx && sc != 2) {
+            reject(new XjsNodeErr(XjsNodeErrCode.HttpResolver, `based on only2xx, unexpected status ${res.statusCode} was returned.`));
+            return;
+        } else if (sc === 3) {
             this.handleRedirect(res, host).then(resolve).catch(reject).finally(() => res.destroy());
             return;
-        }
-        if (res.headers["content-disposition"]?.trim().startsWith("attachment")) {
+        } else if (res.headers["content-disposition"]?.trim().startsWith("attachment")) {
             try {
                 const dest = this.resolveDownloadPath(res.headers["content-disposition"], rc.downloadPath);
                 const stream = fs.createWriteStream(dest);
