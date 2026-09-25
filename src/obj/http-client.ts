@@ -69,6 +69,7 @@ export interface HttpClient {
      * @param op.downloadPath {@link RequestOption.downloadPath}
      * @param op.timeout {@link RequestOption.timeout}
      * @param op.responseType {@link RequestOption.responseType}
+     * @param op.only2xx {@link RequestOption.only2xx}
      * @param op.redirectAsNewRequest handle redirect as new request. this may be efficient when using proxy which is implemented reverse proxy.
      * @returns http response. {@link HttpResponse}
     */
@@ -88,6 +89,7 @@ export interface HttpClient {
      * @param op.downloadPath {@link RequestOption.downloadPath}
      * @param op.timeout {@link RequestOption.timeout}
      * @param op.responseType {@link RequestOption.responseType}
+     * @param op.only2xx {@link RequestOption.only2xx}
      * @returns http response. {@link HttpResponse}
      */
     post(url: string, payload: any, op?: RequestOption & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
@@ -103,6 +105,7 @@ export interface HttpClient {
      * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
      * @param op.timeout {@link RequestOption.timeout}
      * @param op.responseType {@link RequestOption.responseType}
+     * @param op.only2xx {@link RequestOption.only2xx}
      * @returns http response. {@link HttpResponse}
      */
     put(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
@@ -118,6 +121,7 @@ export interface HttpClient {
      * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
      * @param op.timeout {@link RequestOption.timeout}
      * @param op.responseType {@link RequestOption.responseType}
+     * @param op.only2xx {@link RequestOption.only2xx}
      * @returns http response. {@link HttpResponse}
      */
     patch(url: string, payload: any, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
@@ -132,6 +136,7 @@ export interface HttpClient {
      * @param op.ignoreQuery {@link RequestOption.ignoreQuery}
      * @param op.timeout {@link RequestOption.timeout}
      * @param op.responseType {@link RequestOption.responseType}
+     * @param op.only2xx {@link RequestOption.only2xx}
      * @returns http response. {@link HttpResponse}
     */
     delete(url: string, op?: Omit<RequestOption, "downloadPath"> & ClientOption & { responseType: "string" }): Promise<HttpResponse<string>>;
