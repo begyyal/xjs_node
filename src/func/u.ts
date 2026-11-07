@@ -3,6 +3,7 @@ import { isSea } from "node:sea";
 import * as path from "path";
 import { MaybeArray, UType } from "xjs-common";
 import { UFile } from "./u-file";
+import os from 'os';
 
 export function checkPortAvailability(port: number): Promise<boolean> {
     return new Promise(resolve => {
@@ -23,4 +24,24 @@ export function externalRequire<T = any>(packageName: string, modulePath: MaybeA
     const execDir = isSea() ? path.dirname(process.execPath) : process.cwd();
     const p = joinPath(execDir, "node_modules", packageName, modulePath);
     return UFile.exists(p) ? createRequire(joinPath(execDir, 'index.js'))(p) : undefined
+}
+export function getAppDir(appName: string): string {
+    const home = os.homedir();
+    const dir = process.platform === "win32"
+        ? joinPath(process.env.APPDATA || joinPath(home, "AppData", "Roaming"), appName)
+        : process.platform === "darwin"
+            ? joinPath(home, "Library", "Application Support", appName)
+            : joinPath(process.env.XDG_CONFIG_HOME || joinPath(home, ".config"), appName);
+    UFile.mkdir(dir);
+    return dir;
+}
+export function getAppLocalDir(appName: string): string {
+    const home = os.homedir();
+    const dir = process.platform === "win32"
+        ? joinPath(process.env.LOCALAPPDATA || joinPath(home, "AppData", "Local"), appName)
+        : process.platform === "darwin"
+            ? joinPath(home, "Library", "Application Support", appName)
+            : joinPath(process.env.XDG_DATA_HOME || joinPath(home, ".local", "share"), appName);
+    UFile.mkdir(dir);
+    return dir;
 }
