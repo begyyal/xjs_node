@@ -25,23 +25,23 @@ export function externalRequire<T = any>(packageName: string, modulePath: MaybeA
     const p = joinPath(execDir, "node_modules", packageName, modulePath);
     return UFile.exists(p) ? createRequire(joinPath(execDir, 'index.js'))(p) : undefined
 }
-export function getAppDir(appName: string): string {
+export function getAppDir(...appNames: string[]): string {
     const home = os.homedir();
     const dir = process.platform === "win32"
-        ? joinPath(process.env.APPDATA || joinPath(home, "AppData", "Roaming"), appName)
+        ? joinPath(process.env.APPDATA || joinPath(home, "AppData", "Roaming"), ...appNames)
         : process.platform === "darwin"
-            ? joinPath(home, "Library", "Application Support", appName)
-            : joinPath(process.env.XDG_CONFIG_HOME || joinPath(home, ".config"), appName);
+            ? joinPath(home, "Library", "Application Support", ...appNames)
+            : joinPath(process.env.XDG_CONFIG_HOME || joinPath(home, ".config"), ...appNames);
     UFile.mkdir(dir);
     return dir;
 }
-export function getAppLocalDir(appName: string): string {
+export function getAppLocalDir(...appNames: string[]): string {
     const home = os.homedir();
     const dir = process.platform === "win32"
-        ? joinPath(process.env.LOCALAPPDATA || joinPath(home, "AppData", "Local"), appName)
+        ? joinPath(process.env.LOCALAPPDATA || joinPath(home, "AppData", "Local"), ...appNames)
         : process.platform === "darwin"
-            ? joinPath(home, "Library", "Application Support", appName)
-            : joinPath(process.env.XDG_DATA_HOME || joinPath(home, ".local", "share"), appName);
+            ? joinPath(home, "Library", "Application Support", ...appNames)
+            : joinPath(process.env.XDG_DATA_HOME || joinPath(home, ".local", "share"), ...appNames);
     UFile.mkdir(dir);
     return dir;
 }
